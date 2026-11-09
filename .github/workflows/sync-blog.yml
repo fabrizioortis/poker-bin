@@ -1,0 +1,77 @@
+name: Sync Poker to blog
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - LICENSE
+      - README.md
+      - favicon.svg
+      - game.js
+      - index.html
+      - style-effects.css
+      - style.css
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: sync-poker-to-blog
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Poker
+        uses: actions/checkout@v4
+
+      - name: Verify blog token is configured
+        env:
+          BLOG_REPO_TOKEN: ${{ secrets.BLOG_REPO_TOKEN }}
+        shell: bash
+        run: |
+          if [[ -z "$BLOG_REPO_TOKEN" ]]; then
+            echo "::error::Add the BLOG_REPO_TOKEN Actions secret to this repository."
+            exit 1
+          fi
+
+      - name: Checkout blog
+        uses: actions/checkout@v4
+        with:
+          repository: fabrizioortis/my-blog
+          ref: main
+          token: ${{ secrets.BLOG_REPO_TOKEN }}
+          path: blog
+
+      - name: Copy Poker files
+        shell: bash
+        run: |
+          set -euo pipefail
+          destination="blog/public/poker"
+          mkdir -p "$destination"
+
+          for file in LICENSE README.md favicon.svg game.js index.html style-effects.css style.css; do
+            if [[ ! -f "$file" ]]; then
+              echo "Required Poker file is missing: $file" >&2
+              exit 1
+            fi
+            cp "$file" "$destination/$file"
+          done
+
+      - name: Commit and push blog update
+        shell: bash
+        run: |
+          set -euo pipefail
+          git -C blog add public/poker
+          if git -C blog diff --cached --quiet -- public/poker; then
+            echo "Poker files are already up to date."
+            exit 0
+          fi
+
+          git -C blog config user.name "github-actions[bot]"
+          git -C blog config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git -C blog commit -m "Aggiornato Poker Binario"
+          git -C blog push origin HEAD:main
