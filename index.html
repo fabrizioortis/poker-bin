@@ -7,6 +7,7 @@
   <meta name="license" content="https://creativecommons.org/licenses/by-nc-nd/4.0/deed.it">
   <title>Poker Binario — bit, bluff &amp; fortuna</title>
   <link rel="license" href="https://creativecommons.org/licenses/by-nc-nd/4.0/deed.it">
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="style.css">
   <link rel="stylesheet" href="style-effects.css">
   <script src="game.js" defer></script>
@@ -16,16 +17,19 @@
     <header class="topbar">
       <a class="brand" href="#" aria-label="Poker Binario, inizio"><span class="brand-icon">♠</span><span>POKER<span class="brand-accent">_BIN</span><small>BIT, BLUFF &amp; FORTUNA</small></span></a>
       <div class="top-actions">
-        <button class="sound-button" id="sound" type="button" aria-pressed="false">♫ <span>Suono: off</span></button>
+        <button class="sound-button" id="sound" type="button" aria-pressed="false">♫ <span>Attiva suono</span></button>
         <button class="text-button" id="rules-open" type="button">Come si gioca <span>↗</span></button>
       </div>
     </header>
 
     <main>
       <section class="intro">
-        <div><div class="eyebrow"><span class="live-dot"></span> IL TUO TAVOLO È PRONTO <span class="slash">//</span> PLAYER VS CPU</div>
-          <h1>Il poker ha un<br><em>nuovo codice.</em></h1>
-          <p>Tre colori, quattro bit e infinite possibilità.<br>Hai la combinazione giusta?</p>
+        <div class="intro-content">
+          <div class="eyebrow"><span class="live-dot"></span> IL TUO TAVOLO È PRONTO <span class="slash">//</span> PLAYER VS CPU</div>
+          <div class="intro-copy">
+            <h1>Il poker ha un <em>nuovo codice.</em></h1>
+            <p>Quattro colori, quattro bit e infinite possibilità. Hai la combinazione giusta?</p>
+          </div>
         </div>
         <div class="intro-bits" aria-hidden="true"><span>0</span><span>1</span><span>0</span><span>1</span><small>GOOD LUCK_</small></div>
       </section>
@@ -47,13 +51,14 @@
               <div class="stack"><small>FICHES</small><strong id="bot-chips">100</strong></div>
             </div>
             <div class="cards opponent-cards" id="bot-cards" aria-label="Carte della CPU"></div>
+            <div class="opponent-point-slot"><div class="hand-indicator opponent-hand-indicator" id="bot-hand-indicator" aria-live="polite" hidden><span>PUNTO CPU</span><strong id="bot-hand-strength"></strong><button class="point-help" id="bot-point-help" type="button" aria-label="Spiega il punto della CPU" aria-expanded="false" aria-controls="bot-point-tooltip" title="Spiega il punto">i</button><span class="point-tooltip" id="bot-point-tooltip" role="tooltip" hidden></span></div></div>
             <div class="center-table">
               <div class="pot"><span>✦</span><small>PIATTO</small><strong id="pot">0</strong><small>FICHES</small></div>
               <div class="community-wrap" id="community-wrap" hidden><div class="community-label">CARTE COMUNI <span>// THE BOARD</span></div><div class="cards community-cards" id="community-cards"></div></div>
               <div class="draw-hint" id="draw-hint">LA FORTUNA È NEI BIT <span>✳</span></div>
             </div>
             <div class="cards player-cards" id="player-cards" aria-label="Le tue carte"></div>
-            <div class="hand-indicator" id="hand-indicator" aria-live="polite"><span>IL TUO PUNTO</span><strong id="hand-strength"></strong></div>
+            <div class="hand-indicator" id="hand-indicator" aria-live="polite"><span>IL TUO PUNTO</span><strong id="hand-strength"></strong><button class="point-help" id="player-point-help" type="button" aria-label="Spiega il tuo punto" aria-expanded="false" aria-controls="player-point-tooltip" title="Spiega il punto">i</button><span class="point-tooltip" id="player-point-tooltip" role="tooltip" hidden></span></div>
             <div class="player-row">
               <div class="player-label"><div class="avatar player-avatar">☺</div><div><strong>Tu <span class="you-tag">YOU</span></strong><small>PRONTO A GIOCARE</small></div></div>
               <div class="stack"><small>FICHES</small><strong id="player-chips">100</strong></div>
@@ -61,10 +66,15 @@
           </div>
 
           <div class="action-panel">
-            <div class="action-copy"><span class="section-kicker" id="action-kicker">TOCCA A TE</span><strong id="message" aria-live="polite"></strong><small id="detail"></small></div>
+            <div class="action-copy"><span class="section-kicker" id="action-kicker">TOCCA A TE</span><strong id="message" aria-live="polite"></strong><small id="detail"></small><small id="showdown-reason" hidden></small></div>
             <div class="actions" id="bet-actions">
               <button class="button button-fold" id="fold" type="button">Passa</button>
               <button class="button button-secondary" id="call" type="button">Check</button>
+              <div class="bet-presets" id="bet-presets" role="group" aria-label="Puntate rapide">
+                <button type="button" data-bet-preset="3x" title="Tre volte l'ultima puntata o l'ante">3×</button>
+                <button type="button" data-bet-preset="pot" title="Rilancio a piatto">Piatto</button>
+                <button type="button" data-bet-preset="allin" title="Punta tutto lo stack disponibile">All-in</button>
+              </div>
               <label class="bet-input"><span>FICHES</span><input id="bet-amount" type="number" min="1" value="10" inputmode="numeric" aria-label="Importo della puntata o rilancio"></label>
               <button class="button button-primary" id="raise" type="button">Punta <span>↗</span></button>
             </div>
@@ -76,35 +86,34 @@
         <aside class="sidebar">
           <div class="side-heading"><span class="section-kicker">LA TUA BUSSOLA</span><h2>Mani vincenti<span>.</span></h2><p>In ordine di potenza, dalla più alta.</p></div>
           <ol class="ranking">
-            <li><span>01</span><b>Colore</b><em>5 carte, un colore</em></li>
-            <li><span>02</span><b>Serie</b><em>3+ valori consecutivi</em></li>
-            <li><span>03</span><b>AND massimo</b><em>Il risultato più alto</em></li>
-            <li><span>04</span><b>OR minimo</b><em>Il risultato più basso</em></li>
-            <li><span>05</span><b>XOR unico</b><em>Un risultato irripetibile</em></li>
-            <li><span>06</span><b>Bit puro</b><em>5 valori uguali</em></li>
-            <li><span>07</span><b>Terzetto</b><em>3 valori uguali</em></li>
-            <li><span>08</span><b>Bit alto</b><em>Primo bit a 1</em></li>
-            <li><span>09</span><b>Coppia</b><em>2 valori uguali</em></li>
+            <li><span>01</span><b>Scala reale</b><em>5 valori consecutivi, stesso seme</em></li>
+            <li><span>02</span><b>Poker</b><em>4 carte dello stesso valore</em></li>
+            <li><span>03</span><b>Full</b><em>Tris e coppia</em></li>
+            <li><span>04</span><b>Colore</b><em>5 carte dello stesso seme</em></li>
+            <li><span>05</span><b>Serie</b><em>3+ valori consecutivi</em></li>
+            <li><span>06</span><b>Tris</b><em>3 valori uguali</em></li>
+            <li><span>07</span><b>Doppia coppia</b><em>2 coppie di valori</em></li>
+            <li><span>08</span><b>Coppia</b><em>2 valori uguali</em></li>
+            <li><span>09</span><b>Carta alta</b><em>Nessuna combinazione</em></li>
           </ol>
           <div class="side-tip"><span>✳</span><p><strong>Tip della partita</strong><span id="tip-text">Nel dubbio, pensa in binario. O bluffa come se lo facessi.</span></p></div>
           <button class="rules-link" id="rules-open-side" type="button">Leggi tutte le regole <span>↗</span></button>
         </aside>
       </section>
-      <footer><span>POKER_BIN <b>© 2025 <a href="https://fabrizioortis.com">Fabrizio Ortis</a></b></span><span><a rel="license" href="https://creativecommons.org/licenses/by-nc-nd/4.0/deed.it">CC BY-NC-ND 4.0</a> <b>✳</b></span></footer>
+      <footer><span>POKER BINARIO · <b>✳</b> 2026 <a href="https://fabrizioortis.com">Fabrizio Ortis</a></span><span><a rel="license" href="https://creativecommons.org/licenses/by-nc-nd/4.0/deed.it">CC BY-NC-ND 4.0</a> <b>✳</b></span></footer>
     </main>
   </div>
   <dialog id="rules">
     <div class="dialog-heading"><div><span class="section-kicker">IL MANUALE DEL GIOCATORE</span><h2>Le regole<span>.</span></h2></div><button id="rules-close" type="button" aria-label="Chiudi">×</button></div>
     <div class="rules-content">
-      <p>Il mazzo contiene 48 carte: i valori da <b>0000</b> a <b>1111</b>, uno per ciascun colore R, G e B. Giochi contro la CPU con 100 fiches a testa e un invito fino a 5 fiches per mano. Cambiare modalità ricomincia la partita e ripristina le fiches.</p>
+      <p>Il mazzo contiene 64 carte: i valori da <b>0000</b> a <b>1111</b>, uno per ciascuno dei quattro semi rosso, verde, blu e oro. Giochi contro la CPU con 100 fiches a testa e un invito fino a 5 fiches per mano. Cambiare modalità ricomincia la partita e ripristina le fiches.</p>
       <h3>Due modi di giocare</h3>
       <p><b>5 Card Draw:</b> ricevi 5 carte, punta, scambia da 0 a 3 carte e punta di nuovo. Seleziona le carte da cambiare cliccandole.</p>
       <p><b>Texas Hold’em:</b> ricevi 2 carte private. Dopo ogni puntata vengono scoperte le carte comuni: flop (3), turn (1) e river (1). Allo showdown si usa la migliore combinazione di 5 carte fra le 7 disponibili, anche solo comuni.</p>
       <h3>Puntate</h3>
-      <p>La CPU può aprire la puntata, bluffare occasionalmente e chiamare o lasciare davanti a un tuo rilancio in base alla mano e all’importo. Puoi bluffare puntando o rilanciando anche con una mano debole, ma la CPU non passerà sempre. L’importo indicato è la puntata o il rilancio aggiuntivo; non sono previsti piatti laterali. Se un giocatore non ha più fiches, avvia una nuova partita per ricominciare.</p>
+      <p>La CPU può aprire la puntata, bluffare occasionalmente e chiamare, lasciare o rilanciare una volta per fase di puntata in base alla mano e all’importo. Puoi bluffare puntando o rilanciando anche con una mano debole, ma la CPU non passerà sempre. L’importo indicato è la puntata o il rilancio aggiuntivo; non sono previsti piatti laterali. Se un giocatore non ha più fiches, avvia una nuova partita per ricominciare.</p>
       <h3>Come si confrontano le mani</h3>
-      <p>Si applica l’ordine nella lista. Una serie richiede almeno 3 valori distinti consecutivi. AND e OR si calcolano su tutte le coppie della mano: conta rispettivamente il risultato massimo o minimo. XOR è unico se una sola coppia produce quel risultato. A parità di categoria prevalgono lunghezza e valore della serie, AND più alto, OR più basso o XOR più alto; poi i valori delle carte in ordine decrescente. Le altre categorie usano il valore delle carte come spareggio. Un pareggio divide il piatto.</p>
-      <p>Con queste regole ogni mano di almeno due carte ha sempre un AND e un OR: le categorie inferiori non possono quindi essere la migliore combinazione. Inoltre il bit puro di 5 carte è impossibile con soli 3 colori. Sono mostrati per rispettare il regolamento proposto.</p>
+      <p>Ordine delle mani: scala reale (5 valori consecutivi dello stesso seme), poker (4 valori uguali), full (tris e coppia), colore, serie (almeno 3 valori distinti consecutivi), tris, doppia coppia, coppia, carta alta. A parità di categoria si confronta il primo spareggio previsto per quella mano; se è uguale, si passa al successivo. I valori sono numeri binari senza segno: <b>1111</b> (15) batte <b>0000</b> (0). Per la serie prevalgono lunghezza e valore più alto; per poker, full, tris e coppie prevalgono i valori dei gruppi e poi i kicker. Solo se tutti gli spareggi coincidono la mano è pari e il piatto si divide.</p>
     </div>
   </dialog>
 </body>

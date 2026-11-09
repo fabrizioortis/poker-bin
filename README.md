@@ -9,10 +9,11 @@ rilancio in base alla mano e all'importo. Il pulsante del suono attiva effetti
 e jingles generati con Web Audio. Cambiare modalità ricomincia la partita e
 ripristina le fiches.
 
-Le regole e gli spareggi sono consultabili nel gioco. In particolare, come
-da regolamento proposto, AND e OR sono sempre disponibili in una mano di
-cinque carte e quindi precedono le categorie inferiori; cinque carte dello
-stesso valore non sono possibili in un mazzo con tre soli semi.
+Il mazzo contiene 64 carte: i valori da `0000` a `1111` in quattro semi
+(rosso, verde, blu e oro). Le mani seguono una scala familiare: scala reale,
+poker, full, colore, serie di almeno tre valori consecutivi, tris, doppia
+coppia, coppia e carta alta. I valori binari fanno da spareggio. Il poker è
+possibile; il pokerissimo richiederebbe un quinto seme o una carta jolly.
 
 ## Licenza
 
