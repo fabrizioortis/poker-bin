@@ -243,8 +243,83 @@
   z-index: 1;
 }
 
-.card.gold {
-  color: #a87813;
+.card.black {
+  color: #252837;
+}
+
+.suit-mark {
+  position: relative;
+  display: inline-grid;
+  width: 16px;
+  height: 16px;
+  flex: none;
+  place-items: center;
+  color: currentColor;
+}
+
+.suit-mark-core {
+  position: relative;
+  display: block;
+}
+
+.suit-mark--diamond .suit-mark-core {
+  width: 8px;
+  height: 8px;
+  border: 2px solid currentColor;
+  border-radius: 1px;
+  transform: rotate(45deg);
+}
+
+.suit-mark--diamond::after {
+  position: absolute;
+  width: 2px;
+  height: 6px;
+  border-radius: 1px;
+  background: currentColor;
+  content: "";
+}
+
+.suit-mark--node::before {
+  position: absolute;
+  width: 11px;
+  height: 11px;
+  border: 1px solid currentColor;
+  border-radius: 50%;
+  content: "";
+  opacity: .7;
+}
+
+.suit-mark--node .suit-mark-core {
+  z-index: 1;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: currentColor;
+  box-shadow: 0 -6px 0 -1px currentColor, 6px 0 0 -1px currentColor, 0 6px 0 -1px currentColor, -6px 0 0 -1px currentColor;
+}
+
+.suit-mark--play .suit-mark-core {
+  width: 0;
+  height: 0;
+  border-top: 7px solid transparent;
+  border-bottom: 7px solid transparent;
+  border-left: 11px solid currentColor;
+  transform: translateX(1px);
+}
+
+.suit-mark--chip .suit-mark-core {
+  width: 9px;
+  height: 9px;
+  border: 2px solid currentColor;
+  border-radius: 2px;
+  box-shadow: -3px 0 0 -1px currentColor, 3px 0 0 -1px currentColor, 0 -3px 0 -1px currentColor, 0 3px 0 -1px currentColor;
+}
+
+.suit-mark--chip .suit-mark-core::after {
+  position: absolute;
+  inset: 2px;
+  background: currentColor;
+  content: "";
 }
 
 .card .card-symbol {
@@ -284,8 +359,10 @@
 
 .card-corner .card-suit {
   position: static;
+  display: grid;
+  width: 16px;
+  height: 16px;
   z-index: auto;
-  font: 700 15px/1 "DM Mono", monospace;
 }
 
 .card-center {
@@ -298,12 +375,54 @@
 
 .card .card-symbol {
   position: absolute;
-  inset: 0;
+  top: 50%;
+  left: 50%;
   display: grid;
+  width: 38px;
+  height: 38px;
   place-items: center;
-  font: 700 34px/1 "Space Grotesk", sans-serif;
   opacity: .13;
-  transform: none;
+  transform: translate(-50%, -50%);
+}
+
+.card-symbol.suit-mark--diamond .suit-mark-core {
+  width: 18px;
+  height: 18px;
+  border-width: 3px;
+}
+
+.card-symbol.suit-mark--diamond::after {
+  width: 3px;
+  height: 12px;
+}
+
+.card-symbol.suit-mark--node::before {
+  width: 27px;
+  height: 27px;
+  border-width: 2px;
+}
+
+.card-symbol.suit-mark--node .suit-mark-core {
+  width: 8px;
+  height: 8px;
+  box-shadow: 0 -12px 0 -1px currentColor, 12px 0 0 -1px currentColor, 0 12px 0 -1px currentColor, -12px 0 0 -1px currentColor;
+}
+
+.card-symbol.suit-mark--play .suit-mark-core {
+  border-top-width: 16px;
+  border-bottom-width: 16px;
+  border-left-width: 25px;
+}
+
+.card-symbol.suit-mark--chip .suit-mark-core {
+  width: 21px;
+  height: 21px;
+  border-width: 3px;
+  box-shadow: -5px 0 0 -1px currentColor, 5px 0 0 -1px currentColor, 0 -5px 0 -1px currentColor, 0 5px 0 -1px currentColor;
+}
+
+.card-symbol.suit-mark--chip .suit-mark-core::after {
+  inset: 5px;
 }
 
 .card-pips {
@@ -322,8 +441,27 @@
   opacity: .12;
 }
 
+.card-pip .suit-mark {
+  width: 14px;
+  height: 14px;
+}
+
 .card-pip--on {
   opacity: .84;
+}
+
+.bit-marker {
+  display: block;
+  width: 9px;
+  height: 9px;
+  border: 1.5px solid currentColor;
+  border-radius: 2px;
+  transition: background .16s, box-shadow .16s;
+}
+
+.card-pip--on .bit-marker {
+  background: currentColor;
+  box-shadow: 0 0 5px currentColor;
 }
 
 .card-figure {
@@ -471,14 +609,17 @@
   width: 39px;
 }
 
+.card.selected::after {
+  position: absolute;
+  z-index: 2;
   box-shadow: 0 0 0 3px var(--lime), 0 8px 18px #08091966;
   transition: opacity .18s, transform .18s;
-  z-index: 2;
   bottom: 4px;
   left: 50%;
   padding: 2px 3px;
+  border-radius: 3px;
+  background: var(--lime);
   opacity: .24;
-  transform: scale(1.08);
   color: #202339;
   content: "CAMBIA";
   font: 700 6px/1 "DM Mono", monospace;
@@ -486,7 +627,6 @@
   pointer-events: none;
   transform: translateX(-50%);
 }
-
 
 .community-cards .card-corner--top {
   top: 4px;
@@ -503,7 +643,8 @@
 }
 
 .community-cards .card-corner .card-suit {
-  font-size: 11px;
+  width: 11px;
+  height: 11px;
 }
 
 .community-cards .card-center {
@@ -516,11 +657,51 @@
 }
 
 .community-cards .card-pip {
-  font-size: 7px;
+  font-size: 0;
+}
+
+.community-cards .card-pip .suit-mark {
+  width: 10px;
+  height: 10px;
+}
+
+.community-cards .bit-marker {
+  width: 7px;
+  height: 7px;
+  border-width: 1px;
 }
 
 .community-cards .card .card-symbol {
-  font-size: 26px;
+  width: 30px;
+  height: 30px;
+}
+
+.community-cards .card-symbol.suit-mark--diamond .suit-mark-core {
+  width: 14px;
+  height: 14px;
+}
+
+.community-cards .card-symbol.suit-mark--node::before {
+  width: 21px;
+  height: 21px;
+}
+
+.community-cards .card-symbol.suit-mark--node .suit-mark-core {
+  width: 6px;
+  height: 6px;
+  box-shadow: 0 -9px 0 -1px currentColor, 9px 0 0 -1px currentColor, 0 9px 0 -1px currentColor, -9px 0 0 -1px currentColor;
+}
+
+.community-cards .card-symbol.suit-mark--play .suit-mark-core {
+  border-top-width: 12px;
+  border-bottom-width: 12px;
+  border-left-width: 19px;
+}
+
+.community-cards .card-symbol.suit-mark--chip .suit-mark-core {
+  width: 16px;
+  height: 16px;
+  box-shadow: -4px 0 0 -1px currentColor, 4px 0 0 -1px currentColor, 0 -4px 0 -1px currentColor, 0 4px 0 -1px currentColor;
 }
 
 .community-cards .card-figure {
@@ -577,6 +758,23 @@ footer a {
 }
 
 footer a:hover {
+  color: var(--lime);
+}
+
+footer .license-link {
+  margin-left: 9px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: #d5d5e4;
+  font: inherit;
+  text-decoration: underline;
+  text-decoration-color: #72748e;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+footer .license-link:hover {
   color: var(--lime);
 }
 

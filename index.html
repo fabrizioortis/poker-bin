@@ -4,9 +4,9 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#10122a">
-  <meta name="license" content="https://creativecommons.org/licenses/by-nc-nd/4.0/deed.it">
+  <meta name="license" content="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.it">
   <title>Poker Binario — bit, bluff &amp; fortuna</title>
-  <link rel="license" href="https://creativecommons.org/licenses/by-nc-nd/4.0/deed.it">
+  <link rel="license" href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.it">
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="style.css">
   <link rel="stylesheet" href="style-effects.css">
@@ -28,7 +28,7 @@
           <div class="eyebrow"><span class="live-dot"></span> IL TUO TAVOLO È PRONTO <span class="slash">//</span> PLAYER VS CPU</div>
           <div class="intro-copy">
             <h1>Il poker ha un <em>nuovo codice.</em></h1>
-            <p>Quattro colori, quattro bit e infinite possibilità. Hai la combinazione giusta?</p>
+            <p>Quattro semi, quattro bit e infinite possibilità. Hai la combinazione giusta?</p>
           </div>
         </div>
         <div class="intro-bits" aria-hidden="true"><span>0</span><span>1</span><span>0</span><span>1</span><small>GOOD LUCK_</small></div>
@@ -98,15 +98,16 @@
           </ol>
           <div class="side-tip"><span>✳</span><p><strong>Tip della partita</strong><span id="tip-text">Nel dubbio, pensa in binario. O bluffa come se lo facessi.</span></p></div>
           <button class="rules-link" id="rules-open-side" type="button">Leggi tutte le regole <span>↗</span></button>
+          <button class="rules-link series-help-link" id="series-open" type="button">Cos’è una Serie? <span>↗</span></button>
         </aside>
       </section>
-      <footer><span>POKER BINARIO · <b>✳</b> 2026 <a href="https://fabrizioortis.com">Fabrizio Ortis</a></span><span><a rel="license" href="https://creativecommons.org/licenses/by-nc-nd/4.0/deed.it">CC BY-NC-ND 4.0</a> <b>✳</b></span></footer>
+      <footer><span>POKER BINARIO · <b>CC BY-NC-SA 4.0 · 2026</b> <a href="https://fabrizioortis.com">Fabrizio Ortis</a></span><span><button class="license-link" id="license-open" type="button" aria-label="Dettagli licenza CC BY-NC-SA 4.0">Licenza <span>↗</span></button> <b>✳</b></span></footer>
     </main>
   </div>
   <dialog id="rules">
     <div class="dialog-heading"><div><span class="section-kicker">IL MANUALE DEL GIOCATORE</span><h2>Le regole<span>.</span></h2></div><button id="rules-close" type="button" aria-label="Chiudi">×</button></div>
     <div class="rules-content">
-      <p>Il mazzo contiene 64 carte: i valori da <b>0000</b> a <b>1111</b>, uno per ciascuno dei quattro semi rosso, verde, blu e oro. Giochi contro la CPU con 100 fiches a testa e un invito fino a 5 fiches per mano. Cambiare modalità ricomincia la partita e ripristina le fiches.</p>
+      <p>Il mazzo contiene 64 carte: i valori da <b>0000</b> a <b>1111</b>, uno per ciascuno dei quattro semi rosso, verde, blu e nero (microchip). Giochi contro la CPU con 100 fiches a testa e un invito fino a 5 fiches per mano. Cambiare modalità ricomincia la partita e ripristina le fiches.</p>
       <h3>Due modi di giocare</h3>
       <p><b>5 Card Draw:</b> ricevi 5 carte, punta, scambia da 0 a 3 carte e punta di nuovo. Seleziona le carte da cambiare cliccandole.</p>
       <p><b>Texas Hold’em:</b> ricevi 2 carte private. Dopo ogni puntata vengono scoperte le carte comuni: flop (3), turn (1) e river (1). Allo showdown si usa la migliore combinazione di 5 carte fra le 7 disponibili, anche solo comuni.</p>
@@ -114,6 +115,23 @@
       <p>La CPU può aprire la puntata, bluffare occasionalmente e chiamare, lasciare o rilanciare una volta per fase di puntata in base alla mano e all’importo. Puoi bluffare puntando o rilanciando anche con una mano debole, ma la CPU non passerà sempre. L’importo indicato è la puntata o il rilancio aggiuntivo; non sono previsti piatti laterali. Se un giocatore non ha più fiches, avvia una nuova partita per ricominciare.</p>
       <h3>Come si confrontano le mani</h3>
       <p>Ordine delle mani: scala reale (5 valori consecutivi dello stesso seme), poker (4 valori uguali), full (tris e coppia), colore, serie (almeno 3 valori distinti consecutivi), tris, doppia coppia, coppia, carta alta. A parità di categoria si confronta il primo spareggio previsto per quella mano; se è uguale, si passa al successivo. I valori sono numeri binari senza segno: <b>1111</b> (15) batte <b>0000</b> (0). Per la serie prevalgono lunghezza e valore più alto; per poker, full, tris e coppie prevalgono i valori dei gruppi e poi i kicker. Solo se tutti gli spareggi coincidono la mano è pari e il piatto si divide.</p>
+    </div>
+  </dialog>
+  <dialog id="series-help">
+    <div class="dialog-heading"><div><span class="section-kicker">UN ESEMPIO DI PUNTO</span><h2>La Serie<span>.</span></h2></div><button id="series-close" type="button" aria-label="Chiudi">×</button></div>
+    <div class="rules-content">
+      <p>Una Serie è una sequenza di almeno <b>3 valori binari distinti consecutivi</b>. Qui i valori si leggono come numeri da 0 a 15: consecutivi significa che ciascuno aumenta di 1, non che cambia un solo bit.</p>
+      <p><b><code>0000 → 0001 → 0010</code></b> è una Serie di 3: 0, 1, 2. Anche <b><code>0011 → 0100</code></b> è consecutivo: 3, 4, anche se cambiano più bit.</p>
+      <p><b>“Serie di 3 · fino a 0010”</b> vuol dire che la sequenza più lunga trovata contiene tre valori e termina a <code>0010</code>. Vince prima la Serie più lunga; a pari lunghezza prevale il valore finale più alto, poi si confrontano le altre carte dal valore maggiore al minore.</p>
+      <p>Una sequenza di 5 valori dello stesso seme è una <b>Scala reale</b> e batte la Serie. In Texas si cerca la migliore combinazione di 5 carte tra le 2 private e le 5 comuni.</p>
+    </div>
+  </dialog>
+  <dialog id="license-details">
+    <div class="dialog-heading"><div><span class="section-kicker">LICENZA CREATIVE COMMONS</span><h2>Distribuzione<span>.</span></h2></div><button id="license-close" type="button" aria-label="Chiudi">×</button></div>
+    <div class="rules-content">
+      <p><strong>CC BY-NC-SA 4.0 · 2026 Fabrizio Ortis.</strong></p>
+      <p>Quest'opera è distribuita con licenza <a rel="license" href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.it">CC BY-NC-SA 4.0</a>: puoi condividere e modificare Poker Binario per fini non commerciali, con attribuzione. Le opere derivate devono essere distribuite con la stessa licenza.</p>
+      <p>Consulta il <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.it">testo completo della licenza Creative Commons</a>.</p>
     </div>
   </dialog>
 </body>

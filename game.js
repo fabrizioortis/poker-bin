@@ -2,10 +2,10 @@
 
 const $ = (id) => document.getElementById(id);
 const suits = [
-  { code: "R", name: "rosso", className: "red", symbol: "◆" },
-  { code: "G", name: "verde", className: "green", symbol: "●" },
-  { code: "B", name: "blu", className: "blue", symbol: "▲" },
-  { code: "O", name: "oro", className: "gold", symbol: "✦" }
+  { code: "R", name: "rosso", className: "red", shape: "diamond" },
+  { code: "G", name: "verde", className: "green", shape: "node" },
+  { code: "B", name: "blu", className: "blue", shape: "play" },
+  { code: "N", name: "nero", className: "black", shape: "chip" }
 ];
 const bits = (value) => value.toString(2).padStart(4, "0");
 const robotFigures = new Map([[13, "ORBIT"], [14, "NOVA"], [15, "CORE"]]);
@@ -412,6 +412,16 @@ function robotFigure(value) {
   return figure;
 }
 
+function suitMark(suit, extraClass = "") {
+  const mark = document.createElement("span");
+  mark.className = `suit-mark suit-mark--${suit.shape}${extraClass ? ` ${extraClass}` : ""}`;
+  mark.setAttribute("aria-hidden", "true");
+  const core = document.createElement("span");
+  core.className = "suit-mark-core";
+  mark.append(core);
+  return mark;
+}
+
 function cardElement(card, options = {}) {
   const element = document.createElement(options.selectable ? "button" : "div");
   if (options.selectable) element.type = "button";
@@ -436,7 +446,7 @@ function cardElement(card, options = {}) {
       value.textContent = bits(card.value);
       const suit = document.createElement("span");
       suit.className = "card-suit";
-      suit.textContent = card.suit.symbol;
+      suit.append(suitMark(card.suit));
       wrapper.append(value, suit);
       return wrapper;
     };
@@ -446,16 +456,16 @@ function cardElement(card, options = {}) {
     } else {
       const center = document.createElement("span");
       center.className = "card-center";
-      const symbol = document.createElement("span");
-      symbol.className = "card-symbol";
-      symbol.textContent = card.suit.symbol;
-      symbol.setAttribute("aria-hidden", "true");
+      const symbol = suitMark(card.suit, "card-symbol");
       const pips = document.createElement("span");
       pips.className = "card-pips";
       for (let bit = 3; bit >= 0; bit--) {
         const pip = document.createElement("span");
         pip.className = `card-pip${card.value & (1 << bit) ? " card-pip--on" : ""}`;
-        pip.textContent = card.suit.symbol;
+        const marker = document.createElement("span");
+        marker.className = "bit-marker";
+        marker.setAttribute("aria-hidden", "true");
+        pip.append(marker);
         pips.append(pip);
       }
       center.append(symbol, pips);
@@ -714,5 +724,9 @@ document.addEventListener("keydown", (event) => {
 });
 [$("rules-open"), $("rules-open-side")].forEach((button) => button.addEventListener("click", () => $("rules").showModal()));
 $("rules-close").addEventListener("click", () => $("rules").close());
+$("series-open").addEventListener("click", () => $("series-help").showModal());
+$("series-close").addEventListener("click", () => $("series-help").close());
+$("license-open").addEventListener("click", () => $("license-details").showModal());
+$("license-close").addEventListener("click", () => $("license-details").close());
 
 newGame();
