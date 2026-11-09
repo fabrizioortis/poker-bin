@@ -36,20 +36,27 @@ function playSound(kind) {
   try {
     audio ||= new (window.AudioContext || window.webkitAudioContext)();
     if (audio.state === "suspended") audio.resume();
-    const notes = kind === "win" ? [523, 659, 784, 1047] : kind === "lose" ? [330, 247] : kind === "deal" ? [440, 554] : [660];
-    notes.forEach((frequency, index) => {
-      const start = audio.currentTime + index * 0.09;
+    const melodies = {
+      win: { notes: [523, 659, 784, 1047], type: "triangle", spacing: 0.1, duration: 0.25, volume: 0.035 },
+      fold: { notes: [587, 740, 880, 1175], type: "triangle", spacing: 0.085, duration: 0.22, volume: 0.03 },
+      lose: { notes: [330, 247], type: "sine", spacing: 0.11, duration: 0.24, volume: 0.03 },
+      deal: { notes: [440, 554], type: "sine", spacing: 0.09, duration: 0.18, volume: 0.025 },
+      click: { notes: [660], type: "sine", spacing: 0, duration: 0.12, volume: 0.02 }
+    };
+    const melody = melodies[kind] || melodies.click;
+    melody.notes.forEach((frequency, index) => {
+      const start = audio.currentTime + index * melody.spacing;
       const oscillator = audio.createOscillator();
       const gain = audio.createGain();
-      oscillator.type = "sine";
+      oscillator.type = melody.type;
       oscillator.frequency.value = frequency;
       gain.gain.setValueAtTime(0.0001, start);
-      gain.gain.exponentialRampToValueAtTime(0.06, start + 0.015);
-      gain.gain.exponentialRampToValueAtTime(0.0001, start + 0.18);
+      gain.gain.exponentialRampToValueAtTime(melody.volume, start + 0.015);
+      gain.gain.exponentialRampToValueAtTime(0.0001, start + melody.duration);
       oscillator.connect(gain);
       gain.connect(audio.destination);
       oscillator.start(start);
-      oscillator.stop(start + 0.19);
+      oscillator.stop(start + melody.duration + 0.01);
     });
   } catch {
     // Audio is optional when the browser does not support Web Audio.
@@ -127,6 +134,35 @@ function bestHand(cards) {
   return best;
 }
 
+function estimateHandStrength(cards) {
+  if (cards.length >= 5) {
+    const [category, value = 0] = bestHand(cards).score;
+    if (category === 9) return 0.97;
+    if (category === 8) return 0.9;
+    if (category === 7) return 0.55 + value / 15 * 0.3;
+    if (category === 6) return 0.34 + (15 + value) / 15 * 0.18;
+    if (category === 5) return 0.3 + value / 15 * 0.15;
+    if (category === 3) return 0.3;
+    if (category === 2) return 0.28 + value / 15 * 0.1;
+    if (category === 1) return 0.22;
+    return 0.18;
+  }
+  if (cards.length < 2) return 0.2;
+  const [first, second] = cards.slice(0, 2).map((card) => card.value);
+  const sharedBits = (first & second).toString(2).replace(/0/g, "").length;
+  return Math.min(0.72, 0.2 + sharedBits * 0.07 + (first === second ? 0.18 : 0) + Math.max(first, second) / 15 * 0.05);
+}
+
+function botFoldsToRaise(amount) {
+  if (state.botBluff) return true;
+  const strength = estimateHandStrength([...state.bot, ...state.board]);
+  const potAfterCall = Math.max(1, state.pot + state.toCall + amount * 2);
+  const potOdds = amount / potAfterCall;
+  const callThreshold = 0.32 + potOdds * 0.8;
+  if (strength >= callThreshold) return false;
+  return Math.random() < Math.min(0.9, 0.35 + (callThreshold - strength) * 1.1);
+}
+
 function newGame() {
   state = { playerChips: 100, botChips: 100, handNumber: 0 };
   const availableTips = tips.map((_, index) => index).filter((index) => index !== lastTipIndex);
@@ -144,7 +180,7 @@ function newHand() {
     deck: makeDeck(), player: [], bot: [], board: [], selected: new Set(),
     pot: 0, toCall: 0, phase: "bet", street: 0, revealed: false,
     handNumber: state.handNumber + 1, result: "", resultDetail: "",
-    outcome: "", dealAnimation: true
+    outcome: "", dealAnimation: true, botBluff: false
   });
   const ante = Math.min(5, state.playerChips, state.botChips);
   state.playerChips -= ante;
@@ -163,11 +199,17 @@ function newHand() {
 function startBetting() {
   state.phase = "bet";
   state.toCall = 0;
+  state.botBluff = false;
   const max = Math.min(5, state.botChips, state.playerChips);
-  if (max && Math.random() < 0.4) {
+  if (!max) return;
+  const strength = estimateHandStrength([...state.bot, ...state.board]);
+  const bluff = strength < 0.46 && Math.random() < 0.18;
+  const betChance = strength >= 0.74 ? 0.7 : strength >= 0.5 ? 0.38 : 0.04;
+  if (bluff || Math.random() < betChance) {
     state.toCall = max;
     state.botChips -= max;
     state.pot += max;
+    state.botBluff = strength < 0.46;
   }
 }
 
@@ -213,7 +255,7 @@ function showdown() {
     state.botChips += Math.ceil(state.pot / 2);
     state.result = "Pareggio! Piatto diviso.";
   }
-  state.resultDetail = `Tu: ${player.label} · CPU: ${bot.label}`;
+  state.resultDetail = `Tu: ${player.label} · CPU: ${bot.label}${state.botBluff ? " · bluff CPU" : ""}`;
   state.pot = 0;
   playSound(comparison >= 0 ? "win" : "lose");
 }
@@ -318,10 +360,25 @@ $("raise").addEventListener("click", () => {
     $("bet-amount").focus();
     return;
   }
+  const botFolds = botFoldsToRaise(amount);
+  const wasBluff = state.botBluff;
   state.playerChips -= state.toCall + amount;
-  state.botChips -= amount;
-  state.pot += state.toCall + amount * 2;
+  state.pot += state.toCall + amount;
+  if (botFolds) {
+    state.phase = "end";
+    state.toCall = 0;
+    state.outcome = "win";
+    state.result = "La CPU lascia la mano! Hai vinto il piatto.";
+    state.resultDetail = wasBluff ? "Il tuo rilancio ha fermato il bluff." : "La CPU non vede il tuo rilancio.";
+    state.playerChips += state.pot;
+    state.pot = 0;
+    playSound("fold");
+    render();
+    return;
+  }
   playSound("click");
+  state.botChips -= amount;
+  state.pot += amount;
   advance();
 });
 $("fold").addEventListener("click", () => {

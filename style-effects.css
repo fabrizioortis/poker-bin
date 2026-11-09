@@ -22,6 +22,54 @@
   display: block;
 }
 
+.card:not(.back):not(.empty) {
+  overflow: hidden;
+  border-color: #e6e3d8;
+  background: radial-gradient(ellipse at 75% 15%, #ffffff 0, transparent 42%), linear-gradient(145deg, #fffefa, #eeede4);
+  box-shadow: 0 5px 12px #08091955, inset 0 1px 0 #ffffff;
+  isolation: isolate;
+}
+
+.card:not(.back):not(.empty)::before {
+  position: absolute;
+  inset: 5px;
+  border: 1px solid currentColor;
+  border-radius: 4px;
+  content: "";
+  opacity: .14;
+  pointer-events: none;
+}
+
+.card .card-value,
+.card .card-suit {
+  position: relative;
+  z-index: 1;
+}
+
+.card .card-symbol {
+  font-size: 31px;
+  opacity: .24;
+  transform: rotate(-8deg);
+  transition: opacity .18s, transform .18s;
+}
+
+.card.selectable:hover,
+.card.selected {
+  transform: none;
+  border-color: var(--lime);
+  box-shadow: 0 0 0 3px var(--lime), 0 8px 18px #08091966;
+}
+
+.card.selectable:hover .card-symbol,
+.card.selected .card-symbol {
+  opacity: .38;
+  transform: rotate(0) scale(1.08);
+}
+
+.card.selectable {
+  transition: border-color .18s, box-shadow .18s;
+}
+
 footer a {
   color: #d5d5e4;
   text-decoration-color: #72748e;
@@ -42,6 +90,10 @@ footer a:hover {
 
 .table--tie {
   animation: table-tie 550ms ease-out;
+}
+
+.table--win .player-cards .card {
+  animation: card-win 720ms ease-out both;
 }
 
 .card.dealing {
@@ -69,6 +121,11 @@ footer a:hover {
   100% { box-shadow: inset 0 0 70px #11122444, 0 20px 50px #090a1b33; }
 }
 
+@keyframes card-win {
+  45% { box-shadow: 0 0 0 2px var(--lime), 0 0 22px #d8fd5d88; }
+  100% { box-shadow: 0 5px 12px #08091955, inset 0 1px 0 #ffffff; }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -77,6 +134,24 @@ footer a:hover {
     animation-duration: .01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: .01ms !important;
+  }
+}
+
+@media (max-width: 380px) {
+  .cards {
+    gap: 4px;
+  }
+
+  .player-cards .card,
+  .opponent-cards .card {
+    width: 48px;
+    height: 72px;
+    padding: 5px;
+  }
+
+  .player-cards .card-value,
+  .opponent-cards .card-value {
+    font-size: 9px;
   }
 }
 
