@@ -4,8 +4,11 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#10122a">
+  <meta name="license" content="https://creativecommons.org/licenses/by-nc-nd/4.0/deed.it">
   <title>Poker Binario — bit, bluff &amp; fortuna</title>
+  <link rel="license" href="https://creativecommons.org/licenses/by-nc-nd/4.0/deed.it">
   <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style-effects.css">
   <script src="game.js" defer></script>
 </head>
 <body>
@@ -37,7 +40,7 @@
             <div class="hand-number">HAND <strong id="hand-number">#001</strong></div>
           </div>
 
-          <div class="table">
+          <div id="table" class="table">
             <div class="table-topline"><span><i></i> TAVOLO BINARIO</span><span id="phase-label">PRIMA PUNTATA</span></div>
             <div class="opponent-row">
               <div class="player-label"><div class="avatar bot-avatar">🤖</div><div><strong>CPU_01</strong><small>IL TUO AVVERSARIO</small></div></div>
@@ -50,6 +53,7 @@
               <div class="draw-hint" id="draw-hint">LA FORTUNA È NEI BIT <span>✳</span></div>
             </div>
             <div class="cards player-cards" id="player-cards" aria-label="Le tue carte"></div>
+            <div class="hand-indicator" id="hand-indicator" aria-live="polite"><span>IL TUO PUNTO</span><strong id="hand-strength"></strong></div>
             <div class="player-row">
               <div class="player-label"><div class="avatar player-avatar">☺</div><div><strong>Tu <span class="you-tag">YOU</span></strong><small>PRONTO A GIOCARE</small></div></div>
               <div class="stack"><small>FICHES</small><strong id="player-chips">100</strong></div>
@@ -82,11 +86,11 @@
             <li><span>08</span><b>Bit alto</b><em>Primo bit a 1</em></li>
             <li><span>09</span><b>Coppia</b><em>2 valori uguali</em></li>
           </ol>
-          <div class="side-tip"><span>✳</span><p><strong>Piccolo tip</strong>Nel dubbio, pensa in binario. O bluffa come se lo facessi.</p></div>
+          <div class="side-tip"><span>✳</span><p><strong>Tip della partita</strong><span id="tip-text">Nel dubbio, pensa in binario. O bluffa come se lo facessi.</span></p></div>
           <button class="rules-link" id="rules-open-side" type="button">Leggi tutte le regole <span>↗</span></button>
         </aside>
       </section>
-      <footer><span>POKER_BIN <b>© 2025</b></span><span>MADE OF BITS &amp; GOOD VIBES <b>✳</b></span></footer>
+      <footer><span>POKER_BIN <b>© 2025 <a href="https://fabrizioortis.com">Fabrizio Ortis</a></b></span><span><a rel="license" href="https://creativecommons.org/licenses/by-nc-nd/4.0/deed.it">CC BY-NC-ND 4.0</a> <b>✳</b></span></footer>
     </main>
   </div>
   <dialog id="rules">

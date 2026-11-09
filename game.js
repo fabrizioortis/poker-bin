@@ -7,8 +7,27 @@ const suits = [
   { code: "B", name: "blu", className: "blue" }
 ];
 const bits = (value) => value.toString(2).padStart(4, "0");
+const tips = [
+  "Un AND alto nasce da bit condivisi: cerca valori che si somigliano.",
+  "L'OR minimo premia le coppie che accendono meno bit diversi.",
+  "Conserva una coppia: nel Draw può diventare un tris al cambio.",
+  "Una serie richiede almeno tre valori distinti consecutivi.",
+  "Nel poker binario, il colore batte la serie.",
+  "Nel Draw puoi cambiare fino a tre carte, oppure tenerle tutte.",
+  "In Hold'em la miglior mano può usare anche solo le carte comuni.",
+  "Il valore 1111 è alto, ma non sempre è la carta giusta da tenere.",
+  "L'XOR evidenzia i bit diversi: confronta i valori, non solo i semi.",
+  "Un check non costa fiches: usalo quando nessuno ha rilanciato.",
+  "Conta le carte comuni prima di decidere quanto vale la tua mano.",
+  "Un colore richiede cinque carte dello stesso seme.",
+  "Un rilancio è un rischio: valuta prima le fiches che restano.",
+  "Le carte dal valore vicino aiutano a costruire una serie.",
+  "Il piatto si divide in caso di pareggio: anche la CPU può avere la stessa mano.",
+  "Non confondere il valore binario con la forza della combinazione."
+];
 let mode = "draw";
 let state;
+let lastTipIndex = -1;
 let soundEnabled = false;
 let audio;
 
@@ -110,6 +129,9 @@ function bestHand(cards) {
 
 function newGame() {
   state = { playerChips: 100, botChips: 100, handNumber: 0 };
+  const availableTips = tips.map((_, index) => index).filter((index) => index !== lastTipIndex);
+  lastTipIndex = availableTips[Math.floor(Math.random() * availableTips.length)];
+  $("tip-text").textContent = tips[lastTipIndex];
   newHand();
 }
 
@@ -121,7 +143,8 @@ function newHand() {
   Object.assign(state, {
     deck: makeDeck(), player: [], bot: [], board: [], selected: new Set(),
     pot: 0, toCall: 0, phase: "bet", street: 0, revealed: false,
-    handNumber: state.handNumber + 1, result: "", resultDetail: ""
+    handNumber: state.handNumber + 1, result: "", resultDetail: "",
+    outcome: "", dealAnimation: true
   });
   const ante = Math.min(5, state.playerChips, state.botChips);
   state.playerChips -= ante;
@@ -159,6 +182,7 @@ function advance() {
     }
   } else if (state.street < 3) {
     const count = state.street === 0 ? 3 : 1;
+    state.dealAnimation = true;
     for (let i = 0; i < count; i++) state.board.push(state.deck.pop());
     state.street++;
     startBetting();
@@ -176,12 +200,15 @@ function showdown() {
   const bot = bestHand([...state.bot, ...state.board]);
   const comparison = compareScores(player.score, bot.score);
   if (comparison > 0) {
+    state.outcome = "win";
     state.playerChips += state.pot;
     state.result = "Hai vinto la mano! ✨";
   } else if (comparison < 0) {
+    state.outcome = "loss";
     state.botChips += state.pot;
     state.result = "La CPU vince la mano.";
   } else {
+    state.outcome = "tie";
     state.playerChips += Math.floor(state.pot / 2);
     state.botChips += Math.ceil(state.pot / 2);
     state.result = "Pareggio! Piatto diviso.";
@@ -195,14 +222,14 @@ function cardElement(card, options = {}) {
   const element = document.createElement(options.selectable ? "button" : "div");
   if (options.selectable) element.type = "button";
   if (options.back) {
-    element.className = "card back";
+    element.className = `card back${options.deal ? " dealing" : ""}`;
     element.textContent = "✳";
     element.setAttribute("aria-label", "Carta coperta");
   } else if (!card) {
     element.className = "card empty";
     element.setAttribute("aria-label", "Carta comune non ancora scoperta");
   } else {
-    element.className = `card ${card.suit.className}${options.selectable ? " selectable" : ""}${options.selected ? " selected" : ""}`;
+    element.className = `card ${card.suit.className}${options.selectable ? " selectable" : ""}${options.selected ? " selected" : ""}${options.deal ? " dealing" : ""}`;
     element.setAttribute("aria-label", `${bits(card.value)}, ${card.suit.name}${options.selectable ? ", seleziona per cambiare" : ""}`);
     if (options.selectable) element.setAttribute("aria-pressed", String(options.selected));
     const value = document.createElement("div");
@@ -217,6 +244,7 @@ function cardElement(card, options = {}) {
     symbol.setAttribute("aria-hidden", "true");
     element.append(value, suit, symbol);
   }
+  if (options.deal) element.style.setProperty("--deal-index", options.dealIndex || 0);
   return element;
 }
 
@@ -225,11 +253,20 @@ function render() {
   $("player-chips").textContent = state.playerChips;
   $("bot-chips").textContent = state.botChips;
   $("pot").textContent = state.pot;
+  const visibleCards = [...state.player, ...state.board];
+  $("hand-strength").textContent = mode === "draw"
+    ? evaluateFive(state.player).label
+    : visibleCards.length >= 5
+      ? bestHand(visibleCards).label
+      : `In costruzione · ${visibleCards.length}/5 carte`;
+  $("table").classList.toggle("table--win", state.outcome === "win");
+  $("table").classList.toggle("table--loss", state.outcome === "loss");
+  $("table").classList.toggle("table--tie", state.outcome === "tie");
   const phases = mode === "draw" ? ["PRIMA PUNTATA", "SECONDA PUNTATA"] : ["PRE-FLOP", "FLOP", "TURN", "RIVER"];
   $("phase-label").textContent = state.phase === "end" ? (state.revealed ? "SHOWDOWN" : "MANO CONCLUSA") : state.phase === "draw" ? "CAMBIO CARTE" : phases[state.street];
-  $("bot-cards").replaceChildren(...state.bot.map((card) => cardElement(card, { back: !state.revealed })));
+  $("bot-cards").replaceChildren(...state.bot.map((card, index) => cardElement(card, { back: !state.revealed, deal: state.dealAnimation, dealIndex: index })));
   $("player-cards").replaceChildren(...state.player.map((card, index) => {
-    const element = cardElement(card, { selectable: state.phase === "draw", selected: state.selected.has(index) });
+    const element = cardElement(card, { selectable: state.phase === "draw", selected: state.selected.has(index), deal: state.dealAnimation, dealIndex: index });
     if (state.phase === "draw") element.addEventListener("click", () => {
       if (state.selected.has(index)) state.selected.delete(index);
       else if (state.selected.size < 3) state.selected.add(index);
@@ -241,7 +278,8 @@ function render() {
   }));
   $("community-wrap").hidden = mode !== "holdem";
   $("draw-hint").hidden = mode === "holdem";
-  if (mode === "holdem") $("community-cards").replaceChildren(...Array.from({ length: 5 }, (_, i) => cardElement(state.board[i])));
+  if (mode === "holdem") $("community-cards").replaceChildren(...Array.from({ length: 5 }, (_, i) => cardElement(state.board[i], { deal: state.dealAnimation && Boolean(state.board[i]), dealIndex: i })));
+  state.dealAnimation = false;
   $("bet-actions").hidden = state.phase !== "bet";
   $("draw-actions").hidden = state.phase !== "draw";
   $("end-actions").hidden = state.phase !== "end";
@@ -290,6 +328,7 @@ $("fold").addEventListener("click", () => {
   state.botChips += state.pot;
   state.pot = 0;
   state.phase = "end";
+  state.outcome = "loss";
   state.result = "Hai passato la mano.";
   state.resultDetail = "La CPU vince il piatto senza mostrare le carte.";
   playSound("lose");
@@ -299,6 +338,7 @@ $("draw").addEventListener("click", () => {
   state.selected.forEach((index) => { state.player[index] = state.deck.pop(); });
   const botCount = Math.floor(Math.random() * 4);
   for (let i = 0; i < botCount; i++) state.bot[i] = state.deck.pop();
+  state.dealAnimation = true;
   state.selected.clear();
   startBetting();
   playSound("deal");

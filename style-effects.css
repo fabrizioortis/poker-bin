@@ -1,0 +1,88 @@
+.hand-indicator {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 9px;
+  min-height: 22px;
+  margin-top: 3px;
+}
+
+.hand-indicator span {
+  color: #a7a8c0;
+  font: 9px "DM Mono", monospace;
+  letter-spacing: 1px;
+}
+
+.hand-indicator strong {
+  color: var(--lime);
+  font: 700 12px "Space Grotesk", sans-serif;
+}
+
+.side-tip p > span {
+  display: block;
+}
+
+footer a {
+  color: #d5d5e4;
+  text-decoration-color: #72748e;
+  text-underline-offset: 3px;
+}
+
+footer a:hover {
+  color: var(--lime);
+}
+
+.table--win {
+  animation: table-win 800ms ease-out;
+}
+
+.table--loss {
+  animation: table-loss 420ms ease-out;
+}
+
+.table--tie {
+  animation: table-tie 550ms ease-out;
+}
+
+.card.dealing {
+  animation: card-deal 420ms cubic-bezier(.2, .8, .2, 1) both;
+  animation-delay: calc(var(--deal-index, 0) * 55ms);
+}
+
+@keyframes card-deal {
+  from { opacity: 0; transform: translateY(-18px) rotate(-6deg) scale(.92); }
+  to { opacity: 1; transform: translateY(0) rotate(0) scale(1); }
+}
+
+@keyframes table-win {
+  35% { box-shadow: inset 0 0 75px #d8fd5d24, 0 0 28px #d8fd5d55; }
+  100% { box-shadow: inset 0 0 70px #11122444, 0 20px 50px #090a1b33; }
+}
+
+@keyframes table-loss {
+  35% { box-shadow: inset 0 0 75px #ff7fbc20, 0 0 24px #ff7fbc44; }
+  100% { box-shadow: inset 0 0 70px #11122444, 0 20px 50px #090a1b33; }
+}
+
+@keyframes table-tie {
+  50% { box-shadow: inset 0 0 75px #83e5ed20, 0 0 24px #83e5ed44; }
+  100% { box-shadow: inset 0 0 70px #11122444, 0 20px 50px #090a1b33; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+  }
+}
+
+@media (max-width: 600px) {
+  .hand-indicator {
+    flex-wrap: wrap;
+    text-align: center;
+  }
+}
