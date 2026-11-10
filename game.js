@@ -148,32 +148,55 @@ function evaluateFive(cards) {
   const tripleValues = new Set(triples);
   const pairValues = new Set(pairs);
   const kickers = values.filter((value) => !fourValues.has(value) && !tripleValues.has(value) && !pairValues.has(value));
-  if (flush && bestLength === 5) return { score: [10, straightHigh, ...values], label: `Scala reale · fino a ${bits(straightHigh)}` };
+  if (flush && bestLength === 5) {
+    const royal = straightHigh === 15;
+    return { score: [royal ? 11 : 10, straightHigh], label: `${royal ? "Scala reale" : "Scala colore"} · fino a ${bits(straightHigh)}` };
+  }
   if (fours.length) return { score: [9, fours[0], ...kickers], label: "Poker" };
   if (triples.length && pairs.length) return { score: [8, triples[0], pairs[0]], label: "Full" };
-  if (flush) return { score: [7, ...values], label: "Colore" };
-  if (bestLength >= 3) return { score: [6, bestLength, straightHigh, ...values], label: `Serie di ${bestLength} · fino a ${bits(straightHigh)}` };
+  if (bestLength === 5) return { score: [7, straightHigh], label: `Scala · fino a ${bits(straightHigh)}` };
+  if (flush) return { score: [6, ...values], label: "Colore" };
   if (triples.length) return { score: [5, triples[0], ...kickers], label: "Tris" };
   if (pairs.length >= 2) return { score: [4, pairs[0], pairs[1], kickers[0]], label: "Doppia coppia" };
   if (pairs.length) return { score: [3, pairs[0], ...kickers], label: "Coppia" };
   return { score: [2, ...values], label: `Carta alta · ${bits(values[0])}` };
 }
 
-function describeHand(result) {
+function evaluatePartial(cards) {
+  if (!cards.length) return null;
+  const values = cards.map((card) => card.value).sort((a, b) => b - a);
+  const counts = new Map();
+  values.forEach((value) => counts.set(value, (counts.get(value) || 0) + 1));
+  const groups = [...counts].sort((a, b) => b[1] - a[1] || b[0] - a[0]);
+  const fours = groups.filter(([, count]) => count === 4).map(([value]) => value);
+  const triples = groups.filter(([, count]) => count === 3).map(([value]) => value);
+  const pairs = groups.filter(([, count]) => count === 2).map(([value]) => value);
+  const groupedValues = new Set(groups.filter(([, count]) => count > 1).map(([value]) => value));
+  const kickers = values.filter((value) => !groupedValues.has(value));
+  if (fours.length) return { score: [9, fours[0], ...kickers], label: "Poker" };
+  if (triples.length) return { score: [5, triples[0], ...kickers], label: "Tris" };
+  if (pairs.length >= 2) return { score: [4, pairs[0], pairs[1], ...kickers], label: "Doppia coppia" };
+  if (pairs.length) return { score: [3, pairs[0], ...kickers], label: "Coppia" };
+  return { score: [2, ...values], label: `Carta alta · ${bits(values[0])}` };
+}
+
+function describeHand(result, provisional = false) {
   if (!result) return "Punto provvisorio: si basa sulle carte visibili e può cambiare quando se ne scoprono altre.";
   const [category, first = 0, second = 0] = result.score;
   const binaryOrder = "I valori sono numeri binari senza segno: 1111 (15) è il più alto, 0000 (0) il più basso.";
   let description;
-  if (category === 10) description = `Scala reale: cinque valori consecutivi dello stesso seme; il più alto è ${bits(first)}.`;
+  if (category === 11) description = "Scala reale: i cinque valori più alti, da 1011 a 1111, dello stesso seme.";
+  else if (category === 10) description = `Scala colore: cinque valori consecutivi dello stesso seme; il più alto è ${bits(first)}.`;
   else if (category === 9) description = `Poker: quattro carte di valore ${bits(first)}; se pari, decide il kicker.`;
   else if (category === 8) description = `Full: un tris di ${bits(first)} e una coppia di ${bits(second)}.`;
-  else if (category === 7) description = "Colore: cinque carte dello stesso seme; si confrontano i valori dal più alto.";
-  else if (category === 6) description = `Serie di ${first}: ${first} valori consecutivi, dal più basso al più alto ${bits(second)}. Prima conta la lunghezza, poi il valore massimo.`;
+  else if (category === 7) description = `Scala: cinque valori consecutivi; si confronta il valore massimo ${bits(first)}.`;
+  else if (category === 6) description = "Colore: cinque carte dello stesso seme; si confrontano i valori dal più alto.";
   else if (category === 5) description = `Tris di ${bits(first)}; se pari, decidono le altre carte in ordine decrescente.`;
   else if (category === 4) description = `Doppia coppia: ${bits(first)} e ${bits(second)}; poi decide il kicker.`;
   else if (category === 3) description = `Coppia di ${bits(first)}; se pari, decidono le altre carte in ordine decrescente.`;
-  else description = `Carta alta ${bits(first)}; si confrontano le cinque carte dal valore più alto.`;
-  return `${description} ${binaryOrder}`;
+  else description = `Carta alta ${bits(first)}; si confrontano i valori dal più alto.`;
+  const provisionalNote = provisional ? " Punto provvisorio sulle carte visibili: può cambiare quando se ne scoprono altre." : "";
+  return `${description} ${binaryOrder}${provisionalNote}`;
 }
 
 function bestHand(cards) {
@@ -190,11 +213,12 @@ function bestHand(cards) {
 }
 
 function tieBreakLabel(category, index) {
-  if (category === 10) return index === 1 ? "valore della scala reale" : "carta successiva";
+  if (category === 11) return index === 1 ? "valore della scala reale" : "carta successiva";
+  if (category === 10) return index === 1 ? "valore della scala colore" : "carta successiva";
   if (category === 9) return index === 1 ? "valore del poker" : "kicker";
   if (category === 8) return index === 1 ? "valore del tris" : "valore della coppia";
-  if (category === 7) return index === 1 ? "carta più alta del colore" : "carta successiva";
-  if (category === 6) return index === 1 ? "lunghezza della serie" : index === 2 ? "valore massimo della serie" : "carta successiva";
+  if (category === 7) return index === 1 ? "valore massimo della scala" : "carta successiva";
+  if (category === 6) return index === 1 ? "carta più alta del colore" : "carta successiva";
   if (category === 5) return index === 1 ? "valore del tris" : "kicker";
   if (category === 4) return index === 1 ? "coppia più alta" : index === 2 ? "coppia più bassa" : "kicker";
   if (category === 3) return index === 1 ? "valore della coppia" : "kicker";
@@ -214,7 +238,7 @@ function explainHandComparison(player, bot, comparison) {
     const winningValue = winner.score[index] ?? 0;
     const losingValue = loser.score[index] ?? 0;
     if (winningValue === losingValue) continue;
-    const format = (value) => category === 6 && index === 1 ? String(value) : `${bits(value)} (${value})`;
+    const format = (value) => `${bits(value)} (${value})`;
     return `${winnerName}: spareggio ${tieBreakLabel(category, index)} · ${format(winningValue)} > ${format(losingValue)}.`;
   }
   return "Spareggi identici: il piatto si divide.";
@@ -222,12 +246,14 @@ function explainHandComparison(player, bot, comparison) {
 
 function estimateHandStrength(cards) {
   if (cards.length >= 5) {
-    const [category, value = 0] = bestHand(cards).score;
+    const hand = bestHand(cards);
+    const [category, value = 0] = hand.score;
+    if (category === 11) return 0.999;
     if (category === 10) return 0.995;
     if (category === 9) return 0.97;
     if (category === 8) return 0.93;
-    if (category === 7) return 0.84;
-    if (category === 6) return 0.62 + (value - 3) * 0.035 + (bestHand(cards).score[2] / 15) * 0.08;
+    if (category === 7) return 0.86 + value / 15 * 0.06;
+    if (category === 6) return 0.84;
     if (category === 5) return 0.53 + value / 15 * 0.12;
     if (category === 4) return 0.43 + value / 15 * 0.08;
     if (category === 3) return 0.3 + value / 15 * 0.12;
@@ -284,7 +310,7 @@ function newHand() {
     pot: 0, toCall: 0, phase: "bet", street: 0, revealed: false,
     handNumber: state.handNumber + 1, result: "", resultDetail: "",
     outcome: "", dealAnimation: true, botBluff: false, botRaised: false,
-    royalFlush: false, royalWinner: ""
+    straightFlush: false, straightFlushWinner: ""
   });
   const ante = Math.min(2, state.playerChips, state.botChips);
   state.playerChips -= ante;
@@ -398,22 +424,26 @@ function showdown() {
   const player = bestHand([...state.player, ...state.board]);
   const bot = bestHand([...state.bot, ...state.board]);
   const comparison = compareScores(player.score, bot.score);
-  state.royalFlush = player.score[0] === 10 || bot.score[0] === 10;
-  state.royalWinner = comparison === 0 ? "tie" : comparison > 0 ? "player" : "bot";
+  state.straightFlush = player.score[0] >= 10 || bot.score[0] >= 10;
+  state.straightFlushWinner = comparison === 0 ? "tie" : comparison > 0 ? "player" : "bot";
   state.resultReason = explainHandComparison(player, bot, comparison);
   if (comparison > 0) {
     state.outcome = "win";
     state.playerChips += state.pot;
-    state.result = player.score[0] === 10 ? "Scala reale! Hai vinto la mano ✨" : "Hai vinto la mano! ✨";
+    state.result = player.score[0] >= 10 ? `${player.label.split(" · ")[0]}! Hai vinto la mano ✨` : "Hai vinto la mano! ✨";
   } else if (comparison < 0) {
     state.outcome = "loss";
     state.botChips += state.pot;
-    state.result = bot.score[0] === 10 ? "La CPU ha una Scala reale!" : "La CPU vince la mano.";
+    state.result = bot.score[0] >= 10 ? `La CPU ha una ${bot.label.split(" · ")[0]}!` : "La CPU vince la mano.";
   } else {
     state.outcome = "tie";
     state.playerChips += Math.floor(state.pot / 2);
     state.botChips += Math.ceil(state.pot / 2);
-    state.result = state.royalFlush ? "Doppia Scala reale! Piatto diviso." : "Pareggio! Piatto diviso.";
+    state.result = player.score[0] === 11
+      ? "Doppia Scala reale! Piatto diviso."
+      : player.score[0] === 10
+        ? "Doppia Scala colore! Piatto diviso."
+        : "Pareggio! Piatto diviso.";
   }
   state.resultDetail = `Tu: ${player.label} · CPU: ${bot.label}${state.botBluff ? " · bluff CPU" : ""}`;
   state.pot = 0;
@@ -564,13 +594,16 @@ function render() {
   }
   renderedCounters = { pot: state.pot, playerChips: state.playerChips, botChips: state.botChips };
   const visibleCards = [...state.player, ...state.board];
+  const provisional = mode === "holdem" && visibleCards.length < 5;
   const playerHand = mode === "draw"
     ? evaluateFive(state.player)
-    : visibleCards.length >= 5
-      ? bestHand(visibleCards)
-      : null;
-  $("hand-strength").textContent = playerHand?.label || `In costruzione · ${visibleCards.length}/5 carte`;
-  const playerExplanation = describeHand(playerHand);
+    : provisional
+      ? evaluatePartial(visibleCards)
+      : bestHand(visibleCards);
+  $("hand-strength").textContent = playerHand
+    ? `${playerHand.label}${provisional ? ` · ${visibleCards.length}/5 carte` : ""}`
+    : "Punto non disponibile";
+  const playerExplanation = describeHand(playerHand, provisional);
   $("player-point-tooltip").textContent = playerExplanation;
   $("player-point-help").title = playerExplanation;
   $("player-point-help").setAttribute("aria-label", `Spiega il tuo punto: ${playerExplanation}`);
@@ -580,14 +613,14 @@ function render() {
   $("table").classList.toggle("table--holdem", mode === "holdem");
   $("table").classList.toggle("table--busted", state.phase === "end" && !state.playerChips);
   $("table").classList.toggle("table--sweep", state.phase === "end" && !state.botChips && state.playerChips > 0);
-  const royalShowdown = state.phase === "end" && state.royalFlush;
-  $("table").classList.toggle("table--royal-flush", royalShowdown);
-  $("table").classList.toggle("table--royal-player", royalShowdown && state.royalWinner === "player");
-  $("table").classList.toggle("table--royal-bot", royalShowdown && state.royalWinner === "bot");
-  $("table").classList.toggle("table--royal-tie", royalShowdown && state.royalWinner === "tie");
+  const straightFlushShowdown = state.phase === "end" && state.straightFlush;
+  $("table").classList.toggle("table--straight-flush", straightFlushShowdown);
+  $("table").classList.toggle("table--straight-flush-player", straightFlushShowdown && state.straightFlushWinner === "player");
+  $("table").classList.toggle("table--straight-flush-bot", straightFlushShowdown && state.straightFlushWinner === "bot");
+  $("table").classList.toggle("table--straight-flush-tie", straightFlushShowdown && state.straightFlushWinner === "tie");
   $("message").classList.toggle("result-busted", state.phase === "end" && !state.playerChips);
   $("message").classList.toggle("result-sweep", state.phase === "end" && !state.botChips && state.playerChips > 0);
-  $("message").classList.toggle("royal-showdown", royalShowdown);
+  $("message").classList.toggle("straight-flush-showdown", straightFlushShowdown);
   const phases = mode === "draw" ? ["PRIMA PUNTATA", "SECONDA PUNTATA"] : ["PRE-FLOP", "FLOP", "TURN", "RIVER"];
   const runoutStage = state.board.length === 0 ? 0 : state.board.length === 3 ? 1 : state.board.length === 4 ? 2 : 3;
   $("phase-label").textContent = state.phase === "end"
@@ -756,7 +789,6 @@ document.querySelectorAll(".mode").forEach((button) => button.addEventListener("
 $("sound").addEventListener("click", () => {
   soundEnabled = !soundEnabled;
   $("sound").setAttribute("aria-pressed", String(soundEnabled));
-  $("sound").querySelector("span").textContent = soundEnabled ? "Suono: on" : "Suono: off";
   playSound(soundEnabled ? "enable" : "click");
 });
 function closePointTooltips() {
@@ -824,8 +856,6 @@ $("profile-form").addEventListener("submit", () => {
 applyProfile();
 
 $("rules-close").addEventListener("click", () => $("rules").close());
-$("series-open").addEventListener("click", () => $("series-help").showModal());
-$("series-close").addEventListener("click", () => $("series-help").close());
 $("license-open").addEventListener("click", () => $("license-details").showModal());
 $("license-close").addEventListener("click", () => $("license-details").close());
 

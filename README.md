@@ -11,9 +11,13 @@ e jingles generati con Web Audio. Cambiare modalità ricomincia la partita e
 ripristina le fiches.
 
 Il mazzo contiene 64 carte: i valori da `0000` a `1111` in quattro semi
-(rosso, verde, blu e nero/microchip). Le mani seguono una scala familiare: scala reale,
-poker, full, colore, serie di almeno tre valori consecutivi, tris, doppia
-coppia, coppia e carta alta. I valori binari fanno da spareggio. Il poker è
+(rosso, verde, blu e nero/microchip). Le mani seguono questa gerarchia: scala reale,
+scala colore, poker, full, scala di cinque valori consecutivi, colore, tris, doppia
+coppia, coppia e carta alta. La scala reale richiede i cinque valori più alti, da
+`1011` a `1111`, dello stesso seme. La scala
+batte il colore; il full resta sopra la scala.
+In una mano casuale di cinque carte, la scala non a colore appare circa nello
+0,16% dei casi e il full nello 0,076%. I valori binari fanno da spareggio. Il poker è
 possibile; il pokerissimo richiederebbe un quinto seme o una carta jolly.
 
 ## Didattica
