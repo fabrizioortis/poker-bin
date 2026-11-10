@@ -1197,7 +1197,7 @@ footer .license-link:hover {
 /* Pannello azioni a posizione fissa in ogni fase */
 .action-panel {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 600px;
+  grid-template-columns: minmax(0, 1fr) 570px;
   align-items: start;
   min-height: 130px;
 }
@@ -1209,7 +1209,7 @@ footer .license-link:hover {
 .actions {
   justify-content: flex-end;
   flex-wrap: nowrap;
-  width: 600px;
+  width: 570px;
   min-height: 80px;
   align-items: flex-start;
 }
@@ -1219,7 +1219,7 @@ footer .license-link:hover {
 #raise,
 #draw,
 #next {
-  width: 160px;
+  width: 130px;
   padding-inline: 10px;
   text-align: center;
 }
@@ -1265,7 +1265,7 @@ footer .license-link:hover {
     grid-column: 2;
     grid-row: 2 / span 2;
     align-self: stretch;
-    margin-bottom: 65px;
+    margin-bottom: 67px;
     padding-top: 20px;
   }
 

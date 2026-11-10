@@ -20,7 +20,6 @@
     <header class="topbar">
       <a class="brand" href="#" aria-label="Poker Binario, inizio"><span class="brand-icon"><svg viewBox="0 0 64 64" width="26" height="26" aria-hidden="true"><g stroke="currentColor" stroke-width="5" stroke-linecap="round"><path d="M24 8v8M32 8v8M40 8v8M24 48v8M32 48v8M40 48v8M8 24h8M8 32h8M8 40h8M48 24h8M48 32h8M48 40h8"/></g><rect x="16" y="16" width="32" height="32" rx="5" fill="none" stroke="currentColor" stroke-width="5"/><rect x="26" y="26" width="12" height="12" fill="currentColor"/></svg></span><span>POKER<span class="brand-accent"> BINARIO</span><small>BIT, BLUFF &amp; FORTUNA</small></span></a>
       <div class="top-actions">
-        <button class="sound-button" id="lab-open" type="button" aria-label="Laboratorio binario">▦ <span>Laboratorio binario</span></button>
         <button class="sound-button" id="sound" type="button" aria-label="Suono" aria-pressed="false">♫ <span>Suono: off</span></button>
         <button class="text-button" id="rules-open" type="button">Come si gioca <span>↗</span></button>
       </div>
@@ -42,8 +41,8 @@
         <div class="game-main">
           <div class="game-heading">
             <div><span class="section-kicker">SCEGLI LA MODALITÀ</span><div class="mode-switch" role="group" aria-label="Modalità di gioco">
-              <button class="mode" type="button" data-mode="draw" aria-pressed="false"><svg class="mode-icon" viewBox="0 0 40 24" width="26" height="16" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="1.6"><rect x="16" y="4" width="8" height="15" rx="1.5" transform="rotate(-32 20 20)"/><rect x="16" y="4" width="8" height="15" rx="1.5" transform="rotate(-16 20 20)"/><rect x="16" y="4" width="8" height="15" rx="1.5"/><rect x="16" y="4" width="8" height="15" rx="1.5" transform="rotate(16 20 20)"/><rect x="16" y="4" width="8" height="15" rx="1.5" transform="rotate(32 20 20)"/></g></svg> <span>5 Card Draw</span></button>
               <button class="mode active" type="button" data-mode="holdem" aria-pressed="true"><svg class="mode-icon" viewBox="0 0 40 24" width="26" height="16" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="1.6"><rect x="10" y="3" width="9" height="15" rx="1.5"/><rect x="21" y="3" width="9" height="15" rx="1.5"/></g></svg> <span>Texas Hold’em</span></button>
+              <button class="mode" type="button" data-mode="draw" aria-pressed="false"><svg class="mode-icon" viewBox="0 0 40 24" width="26" height="16" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="1.6"><rect x="16" y="4" width="8" height="15" rx="1.5" transform="rotate(-32 20 20)"/><rect x="16" y="4" width="8" height="15" rx="1.5" transform="rotate(-16 20 20)"/><rect x="16" y="4" width="8" height="15" rx="1.5"/><rect x="16" y="4" width="8" height="15" rx="1.5" transform="rotate(16 20 20)"/><rect x="16" y="4" width="8" height="15" rx="1.5" transform="rotate(32 20 20)"/></g></svg> <span>5 Card Draw</span></button>
             </div></div>
             <div class="hand-number">HAND <strong id="hand-number">#001</strong></div>
           </div>
@@ -86,10 +85,10 @@
                   <button type="button" class="bet-step" id="bet-plus" aria-label="Aumenta">+</button>
                 </div>
               </div>
-              <button class="button button-primary" id="raise" type="button">Punta <span>↗</span></button>
+              <button class="button button-primary" id="raise" type="button">Punta</button>
             </div>
-            <div class="actions" id="draw-actions" hidden><button class="button button-primary" id="draw" type="button">Cambia carte <span>↗</span></button></div>
-            <div class="actions" id="end-actions" hidden><button class="button button-primary" id="next" type="button">Nuova mano <span>↗</span></button></div>
+            <div class="actions" id="draw-actions" hidden><button class="button button-primary" id="draw" type="button">Cambia carte</button></div>
+            <div class="actions" id="end-actions" hidden><button class="button button-primary" id="next" type="button">Nuova mano</button></div>
           </div>
         </div>
 
@@ -108,6 +107,7 @@
           </ol>
           <div class="side-tip"><span>✳</span><p><strong>Curiosità binaria</strong><span id="tip-text">Nel dubbio, pensa in binario. O bluffa come se lo facessi.</span></p></div>
           <button class="rules-link series-help-link" id="series-open" type="button">Cos’è una Serie? <span>↗</span></button>
+          <button class="rules-link series-help-link" id="lab-open" type="button">Laboratorio binario <span>↗</span></button>
         </aside>
       </section>
       <footer><span>POKER BINARIO · <b>CC BY-NC-SA 4.0 · 2026</b> <a href="https://fabrizioortis.com">Fabrizio Ortis</a></span><span><button class="license-link" id="license-open" type="button" aria-label="Dettagli licenza CC BY-NC-SA 4.0">Licenza <span>↗</span></button> <b>✳</b></span></footer>
