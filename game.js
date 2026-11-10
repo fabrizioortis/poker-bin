@@ -8,6 +8,21 @@ const suits = [
   { code: "N", name: "nero", className: "black", shape: "chip" }
 ];
 const bits = (value) => value.toString(2).padStart(4, "0");
+const opponents = [
+  { name: "RoboByte", avatar: "🤖" },
+  { name: "AlienPixel", avatar: "👾" },
+  { name: "OctoBit", avatar: "🐙" },
+  { name: "FoxScript", avatar: "🦊" },
+  { name: "BrainCore", avatar: "🧠" },
+  { name: "FrogCode", avatar: "🐸" },
+  { name: "MechArm", avatar: "🦾" },
+  { name: "VortexLoop", avatar: "🌀" },
+  { name: "OwlHex", avatar: "🦉" },
+  { name: "TurtleLag", avatar: "🐢" }
+];
+const opponentIndex = Math.floor(Math.random() * opponents.length);
+$("bot-name").textContent = opponents[opponentIndex].name;
+$("bot-avatar").textContent = opponents[opponentIndex].avatar;
 const robotFigures = new Map([[13, "ORBIT"], [14, "NOVA"], [15, "CORE"]]);
 const tips = [
   "Una coppia è buona, ma i valori più alti fanno da spareggio.",
@@ -28,6 +43,41 @@ const tips = [
   "Non confondere il valore binario con la forza della combinazione."
 ];
 let mode = "draw";
+let learn = true;
+try { learn = localStorage.getItem("learn") !== "off"; } catch { /* storage non disponibile */ }
+const binaryTips = [
+  "Un bit è una cifra che vale solo 0 oppure 1.",
+  "Con 4 bit si contano 16 valori: da 0000 (0) a 1111 (15).",
+  "I pesi di 4 bit sono 8, 4, 2, 1: somma quelli dove c'è un 1.",
+  "0110 = 4 + 2 = 6: contano solo i pesi dove c'è un 1.",
+  "Aggiungere uno 0 a destra raddoppia: 11 (3) diventa 110 (6).",
+  "1111 è il massimo con 4 bit: aggiungi 1 e si torna a 0000.",
+  "Con 2 bit si contano 4 numeri: per questo i semi sono 4.",
+  "Seme (2 bit) + valore (4 bit) = 6 bit: 2⁶ = 64 carte.",
+  "Otto bit formano un byte: si conta da 0 a 255.",
+  "Le fiches iniziali, 128, sono 10000000: un solo bit acceso.",
+  "128 + 128 = 256: servono 9 bit, 100000000.",
+  "Il bit più a sinistra pesa di più: 1000 (8) batte 0111 (7)."
+];
+const suitBits = ["00", "01", "10", "11"];
+
+function sumText(value) {
+  const digits = value.toString(2);
+  const parts = [...digits].map((digit, index) => digit === "1" ? 2 ** (digits.length - 1 - index) : null).filter(Boolean);
+  return parts.length ? `${parts.join(" + ")} = ${value}` : "0";
+}
+
+function renderBits(container, value, length = 8) {
+  const digits = value.toString(2).padStart(length, "0");
+  container.title = `${digits}: ${sumText(value)}`;
+  container.replaceChildren(...[...digits].map((digit, index) => {
+    const cell = document.createElement("i");
+    cell.textContent = digit;
+    cell.dataset.w = 2 ** (digits.length - 1 - index);
+    if (digit === "1") cell.className = "on";
+    return cell;
+  }));
+}
 let state;
 let lastTipIndex = -1;
 let soundEnabled = false;
@@ -184,7 +234,7 @@ function explainHandComparison(player, bot, comparison) {
     const winningValue = winner.score[index] ?? 0;
     const losingValue = loser.score[index] ?? 0;
     if (winningValue === losingValue) continue;
-    const format = (value) => category === 6 && index === 1 ? String(value) : bits(value);
+    const format = (value) => category === 6 && index === 1 ? String(value) : `${bits(value)} (${value})`;
     return `${winnerName}: spareggio ${tieBreakLabel(category, index)} · ${format(winningValue)} > ${format(losingValue)}.`;
   }
   return "Spareggi identici: il piatto si divide.";
@@ -227,15 +277,21 @@ function botRaiseAmount() {
   if (state.botChips <= state.playerChips && strength >= 0.78 && Math.random() < 0.08) return state.botChips;
   const raiseChance = strength >= 0.82 ? 0.34 : strength >= 0.68 ? 0.24 : strength >= 0.52 ? 0.13 : 0.04;
   if (Math.random() >= raiseChance) return 0;
-  return Math.min(maxRaise, Math.max(1, Math.min(5, Math.round(state.pot * 0.3))));
+  return Math.min(maxRaise, Math.max(2, Math.min(4, Math.round(state.pot * 0.3))));
+}
+
+function showTip() {
+  const list = learn ? binaryTips : tips;
+  const availableTips = list.map((_, index) => index).filter((index) => index !== lastTipIndex);
+  lastTipIndex = availableTips[Math.floor(Math.random() * availableTips.length)];
+  $("tip-title").textContent = learn ? "Pillola binaria" : "Tip della partita";
+  $("tip-text").textContent = list[lastTipIndex];
 }
 
 function newGame() {
   runoutToken++;
-  state = { playerChips: 100, botChips: 100, handNumber: 0 };
-  const availableTips = tips.map((_, index) => index).filter((index) => index !== lastTipIndex);
-  lastTipIndex = availableTips[Math.floor(Math.random() * availableTips.length)];
-  $("tip-text").textContent = tips[lastTipIndex];
+  state = { playerChips: 128, botChips: 128, handNumber: 0 };
+  showTip();
   newHand();
 }
 
@@ -251,7 +307,7 @@ function newHand() {
     outcome: "", dealAnimation: true, botBluff: false, botRaised: false,
     royalFlush: false, royalWinner: ""
   });
-  const ante = Math.min(5, state.playerChips, state.botChips);
+  const ante = Math.min(2, state.playerChips, state.botChips);
   state.playerChips -= ante;
   state.botChips -= ante;
   state.pot = ante * 2;
@@ -270,7 +326,8 @@ function startBetting() {
   state.toCall = 0;
   state.botBluff = false;
   state.botRaised = false;
-  const max = Math.min(5, state.botChips, state.playerChips);
+  $("bet-amount").value = 4;
+  const max = Math.min(2, state.botChips, state.playerChips);
   if (!max) return;
   const strength = estimateHandStrength([...state.bot, ...state.board]);
   const allInChance = strength >= 0.82 ? 0.08 : strength >= 0.68 ? 0.035 : 0.008;
@@ -437,6 +494,8 @@ function cardElement(card, options = {}) {
     const figureLabel = robotFigures.has(card.value) ? `, figura robotica ${robotFigures.get(card.value)}` : "";
     element.setAttribute("aria-label", `${bits(card.value)}, ${card.suit.name}${figureLabel}${options.selectable ? ", seleziona per cambiare" : ""}`);
     if (options.selectable) element.setAttribute("aria-pressed", String(options.selected));
+    element.dataset.value = card.value;
+    element.dataset.suit = suits.indexOf(card.suit);
     const corner = (position) => {
       const wrapper = document.createElement("span");
       wrapper.className = `card-corner card-corner--${position}`;
@@ -488,14 +547,20 @@ function updateDrawControls() {
 function setBetPreset(preset) {
   const maxRaise = Math.min(state.playerChips - state.toCall, state.botChips);
   if (maxRaise < 1) return;
-  const amount = preset === "3x"
-    ? Math.max(5, state.toCall) * 3
+  const amount = preset === "half"
+    ? Math.round(state.pot / 2)
     : preset === "pot"
       ? state.pot + state.toCall
       : maxRaise;
-  $("bet-amount").value = Math.min(maxRaise, Math.max(1, amount));
-  $("bet-amount").focus();
+  setBetAmount(amount);
   playSound("click");
+}
+
+function setBetAmount(amount) {
+  const max = Number($("bet-amount").max) || 1;
+  const value = Math.min(max, Math.max(Math.min(2, max), Math.round(Number(amount)) || 2));
+  $("bet-amount").value = value;
+  $("bet-slider").value = value;
 }
 
 function render() {
@@ -503,7 +568,10 @@ function render() {
   $("hand-number").textContent = `#${String(state.handNumber).padStart(3, "0")}`;
   $("player-chips").textContent = state.playerChips;
   $("bot-chips").textContent = state.botChips;
+  renderBits($("player-chips-bin"), state.playerChips);
+  renderBits($("bot-chips-bin"), state.botChips);
   $("pot").textContent = state.pot;
+  renderBits($("pot-bin"), state.pot);
   if (previousCounters) {
     if (state.pot !== previousCounters.pot) {
       animateCounter($("pot").closest(".pot"), state.pot > previousCounters.pot ? "pot-increase" : "pot-collect");
@@ -572,7 +640,6 @@ function render() {
     return element;
   }));
   $("community-wrap").hidden = mode !== "holdem";
-  $("draw-hint").hidden = mode === "holdem";
   if (mode === "holdem") $("community-cards").replaceChildren(...Array.from({ length: 5 }, (_, i) => cardElement(state.board[i], { deal: state.dealAnimation && Boolean(state.board[i]), dealIndex: i })));
   state.dealAnimation = false;
   $("bet-actions").hidden = state.phase !== "bet";
@@ -591,8 +658,13 @@ function render() {
     $("raise").firstChild.textContent = state.toCall ? "Rilancia " : "Punta ";
     const maxRaise = Math.min(state.playerChips - state.toCall, state.botChips);
     $("bet-amount").max = Math.max(0, maxRaise);
+    $("bet-slider").max = Math.max(1, maxRaise);
+    setBetAmount(Number($("bet-amount").value));
     $("raise").disabled = maxRaise < 1;
     $("bet-amount").disabled = maxRaise < 1;
+    $("bet-slider").disabled = maxRaise < 1;
+    $("bet-minus").disabled = maxRaise < 1;
+    $("bet-plus").disabled = maxRaise < 1;
     $("bet-presets").querySelectorAll("button").forEach((button) => { button.disabled = maxRaise < 1; });
   } else if (state.phase === "draw") {
     $("message").textContent = "Vuoi cambiare carte?";
@@ -622,8 +694,9 @@ $("call").addEventListener("click", () => {
 $("raise").addEventListener("click", () => {
   const amount = Number($("bet-amount").value);
   const max = Math.min(state.playerChips - state.toCall, state.botChips);
-  if (!Number.isInteger(amount) || amount < 1 || amount > max) {
-    $("detail").textContent = `Inserisci un importo intero tra 1 e ${max} fiches.`;
+  const minBet = Math.min(2, max);
+  if (!Number.isInteger(amount) || amount < minBet || amount > max) {
+    $("detail").textContent = `Inserisci un importo intero tra ${minBet} e ${max} fiches.`;
     $("bet-amount").focus();
     return;
   }
@@ -658,6 +731,11 @@ $("raise").addEventListener("click", () => {
   }
   advance();
 });
+$("bet-slider").addEventListener("input", () => setBetAmount($("bet-slider").value));
+$("bet-amount").addEventListener("change", () => setBetAmount($("bet-amount").value));
+$("bet-minus").addEventListener("click", () => setBetAmount(Math.ceil(Number($("bet-amount").value) / 2) * 2 - 2));
+$("bet-plus").addEventListener("click", () => setBetAmount(Math.floor(Number($("bet-amount").value) / 2) * 2 + 2));
+
 $("bet-presets").addEventListener("click", (event) => {
   const button = event.target.closest("[data-bet-preset]");
   if (button) setBetPreset(button.dataset.betPreset);
@@ -722,11 +800,165 @@ document.addEventListener("pointerdown", (event) => {
 document.addEventListener("keydown", (event) => {
   if (event.key === "Escape") closePointTooltips();
 });
-[$("rules-open"), $("rules-open-side")].forEach((button) => button.addEventListener("click", () => $("rules").showModal()));
+[$("rules-open")].forEach((button) => button.addEventListener("click", () => $("rules").showModal()));
+const playerAvatars = ["🧑‍💻", "👩🏾‍💻", "🧑‍🚀", "👩‍🔬", "🕵️", "🧑‍🎤", "👩‍🎤", "🧔🏿‍♂️", "\u{1F468}\u200D\u{1F9B2}", "🧑‍✈️"];
+const setAvatar = (element, avatar) => {
+  if (avatar.startsWith("<svg")) element.innerHTML = avatar;
+  else element.textContent = avatar;
+};
+let profile = { name: "", avatar: 0 };
+try {
+  const saved = JSON.parse(localStorage.getItem("profile"));
+  if (saved && typeof saved.name === "string" && playerAvatars[saved.avatar]) profile = { name: saved.name.slice(0, 14), avatar: saved.avatar };
+} catch { /* profilo non salvato o non valido */ }
+
+function applyProfile() {
+  $("player-name").textContent = profile.name || "Tu";
+  setAvatar($("player-avatar"), playerAvatars[profile.avatar]);
+}
+
+let pendingAvatar = profile.avatar;
+function renderAvatarGrid() {
+  $("avatar-grid").replaceChildren(...playerAvatars.map((emoji, index) => {
+    const option = document.createElement("button");
+    option.type = "button";
+    setAvatar(option, emoji);
+    option.setAttribute("role", "radio");
+    option.setAttribute("aria-checked", String(index === pendingAvatar));
+    option.addEventListener("click", () => { pendingAvatar = index; renderAvatarGrid(); });
+    return option;
+  }));
+}
+
+function openProfile() {
+  pendingAvatar = profile.avatar;
+  $("profile-name").value = profile.name;
+  renderAvatarGrid();
+  $("profile").showModal();
+}
+
+$("profile-open").addEventListener("click", openProfile);
+$("player-avatar").addEventListener("click", openProfile);
+$("profile-close").addEventListener("click", () => $("profile").close());
+$("profile-form").addEventListener("submit", () => {
+  profile = { name: $("profile-name").value.trim().slice(0, 14), avatar: pendingAvatar };
+  try { localStorage.setItem("profile", JSON.stringify(profile)); } catch { /* storage non disponibile */ }
+  applyProfile();
+});
+applyProfile();
+
 $("rules-close").addEventListener("click", () => $("rules").close());
 $("series-open").addEventListener("click", () => $("series-help").showModal());
 $("series-close").addEventListener("click", () => $("series-help").close());
 $("license-open").addEventListener("click", () => $("license-details").showModal());
 $("license-close").addEventListener("click", () => $("license-details").close());
 
+function applyLearn(changed = false) {
+  document.body.classList.toggle("learn-on", learn);
+  $("learn").setAttribute("aria-pressed", String(learn));
+  $("learn").querySelector("span").textContent = learn ? "Didattica: on" : "Didattica: off";
+  if (!learn) hideBitTip();
+  if (changed) {
+    try { localStorage.setItem("learn", learn ? "on" : "off"); } catch { /* storage non disponibile */ }
+    lastTipIndex = -1;
+    showTip();
+  }
+}
+$("learn").addEventListener("click", () => {
+  learn = !learn;
+  applyLearn(true);
+  playSound("click");
+});
+
+function hideBitTip() {
+  $("bit-tip").hidden = true;
+}
+
+function showBitTip(card) {
+  const value = Number(card.dataset.value);
+  const suit = suits[Number(card.dataset.suit)];
+  const digits = bits(value);
+  const tip = $("bit-tip");
+  const rows = [
+    `${digits} = ${value}`,
+    `${[...digits].map((digit, index) => `${digit}×${8 >> index}`).join(" + ")} = ${value}`,
+    `Seme ${suit.name} ${suitBits[Number(card.dataset.suit)]} + valore ${digits} = carta a 6 bit: ${suitBits[Number(card.dataset.suit)]}${digits}`
+  ];
+  tip.replaceChildren(...rows.map((text, index) => {
+    const row = document.createElement(index === 0 ? "strong" : "span");
+    row.textContent = text;
+    return row;
+  }));
+  tip.hidden = false;
+  const rect = card.getBoundingClientRect();
+  const width = tip.offsetWidth;
+  const left = Math.min(window.innerWidth - width - 8, Math.max(8, rect.left + rect.width / 2 - width / 2));
+  const above = rect.top - tip.offsetHeight - 8;
+  tip.style.left = `${left}px`;
+  tip.style.top = `${above >= 8 ? above : rect.bottom + 8}px`;
+}
+
+function cardFromEvent(event) {
+  return learn && event.target instanceof Element ? event.target.closest(".card[data-value]") : null;
+}
+$("table").addEventListener("pointerover", (event) => {
+  const card = cardFromEvent(event);
+  if (card) showBitTip(card);
+  else hideBitTip();
+});
+$("table").addEventListener("pointerleave", hideBitTip);
+$("table").addEventListener("focusin", (event) => {
+  const card = cardFromEvent(event);
+  if (card) showBitTip(card);
+});
+$("table").addEventListener("focusout", hideBitTip);
+document.addEventListener("pointerdown", (event) => {
+  if (!(event.target instanceof Element) || !event.target.closest(".card")) hideBitTip();
+});
+window.addEventListener("scroll", hideBitTip, { passive: true });
+
+let labValue = 0;
+function renderLab(source) {
+  const digits = labValue.toString(2).padStart(8, "0");
+  $("lab-bits").replaceChildren(...[...digits].map((digit, index) => {
+    const weight = 128 >> index;
+    const cell = document.createElement("button");
+    cell.type = "button";
+    cell.className = `lab-bit${digit === "1" ? " on" : ""}`;
+    cell.setAttribute("aria-pressed", String(digit === "1"));
+    cell.setAttribute("aria-label", `Bit di peso ${weight}`);
+    const w = document.createElement("small");
+    w.textContent = weight;
+    cell.append(w, digit);
+    cell.addEventListener("click", () => {
+      labValue ^= weight;
+      renderLab();
+    });
+    return cell;
+  }));
+  $("lab-sum").textContent = labValue ? `${digits} → ${sumText(labValue)}` : `${digits} → nessun peso acceso = 0`;
+  if (source !== "dec") $("lab-dec").value = labValue;
+  if (source !== "bin") $("lab-bin").value = digits;
+}
+$("lab-dec").addEventListener("input", () => {
+  const value = Number($("lab-dec").value);
+  if ($("lab-dec").value !== "" && Number.isInteger(value) && value >= 0 && value <= 255) {
+    labValue = value;
+    renderLab("dec");
+  }
+});
+$("lab-bin").addEventListener("input", () => {
+  const text = $("lab-bin").value;
+  if (/^[01]{1,8}$/.test(text)) {
+    labValue = parseInt(text, 2);
+    renderLab("bin");
+  }
+});
+$("lab-open").addEventListener("click", () => {
+  renderLab();
+  $("lab").showModal();
+});
+$("lab-close").addEventListener("click", () => $("lab").close());
+
+applyLearn();
 newGame();

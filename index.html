@@ -5,7 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#10122a">
   <meta name="license" content="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.it">
-  <title>Poker Binario — bit, bluff &amp; fortuna</title>
+  <title>Poker Binario — impara il sistema binario giocando</title>
+  <meta name="description" content="Un gioco di poker contro la CPU per imparare il sistema binario: ogni carta è un numero a 4 bit. Pensato per chi parte da zero, a scuola e a casa.">
   <link rel="license" href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.it">
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="style.css">
@@ -15,8 +16,9 @@
 <body>
   <div class="shell">
     <header class="topbar">
-      <a class="brand" href="#" aria-label="Poker Binario, inizio"><span class="brand-icon">♠</span><span>POKER<span class="brand-accent"> BINARIO</span><small>BIT, BLUFF &amp; FORTUNA</small></span></a>
+      <a class="brand" href="#" aria-label="Poker Binario, inizio"><span class="brand-icon"><svg viewBox="0 0 64 64" width="26" height="26" aria-hidden="true"><g stroke="currentColor" stroke-width="5" stroke-linecap="round"><path d="M24 8v8M32 8v8M40 8v8M24 48v8M32 48v8M40 48v8M8 24h8M8 32h8M8 40h8M48 24h8M48 32h8M48 40h8"/></g><rect x="16" y="16" width="32" height="32" rx="5" fill="none" stroke="currentColor" stroke-width="5"/><rect x="26" y="26" width="12" height="12" fill="currentColor"/></svg></span><span>POKER<span class="brand-accent"> BINARIO</span><small>BIT, BLUFF &amp; FORTUNA</small></span></a>
       <div class="top-actions">
+        <button class="sound-button" id="learn" type="button" aria-pressed="true" title="Mostra i pesi dei bit e le spiegazioni sulle carte">▦ <span>Didattica: on</span></button>
         <button class="sound-button" id="sound" type="button" aria-pressed="false">♫ <span>Attiva suono</span></button>
         <button class="text-button" id="rules-open" type="button">Come si gioca <span>↗</span></button>
       </div>
@@ -27,8 +29,8 @@
         <div class="intro-content">
           <div class="eyebrow"><span class="live-dot"></span> IL TUO TAVOLO È PRONTO <span class="slash">//</span> PLAYER VS CPU</div>
           <div class="intro-copy">
-            <h1>Il poker ha un <em>nuovo codice.</em></h1>
-            <p>Quattro semi, quattro bit e infinite possibilità. Hai la combinazione giusta?</p>
+            <h1>Il poker ha un <em>nuovo codice</em></h1>
+            <p>Ogni carta è un numero binario a 4 bit. Gioca a poker e scopri, mano dopo mano, quanto vale 0110 e perché 1000 batte 0111.</p>
           </div>
         </div>
         <div class="intro-bits" aria-hidden="true"><span>0</span><span>1</span><span>0</span><span>1</span><small>GOOD LUCK_</small></div>
@@ -38,8 +40,8 @@
         <div class="game-main">
           <div class="game-heading">
             <div><span class="section-kicker">SCEGLI LA MODALITÀ</span><div class="mode-switch" role="group" aria-label="Modalità di gioco">
-              <button class="mode active" type="button" data-mode="draw" aria-pressed="true">⌁ <span>5 Card Draw</span></button>
-              <button class="mode" type="button" data-mode="holdem" aria-pressed="false">♠ <span>Texas Hold’em</span></button>
+              <button class="mode active" type="button" data-mode="draw" aria-pressed="true"><svg class="mode-icon" viewBox="0 0 40 24" width="26" height="16" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="1.6"><rect x="16" y="4" width="8" height="15" rx="1.5" transform="rotate(-32 20 20)"/><rect x="16" y="4" width="8" height="15" rx="1.5" transform="rotate(-16 20 20)"/><rect x="16" y="4" width="8" height="15" rx="1.5"/><rect x="16" y="4" width="8" height="15" rx="1.5" transform="rotate(16 20 20)"/><rect x="16" y="4" width="8" height="15" rx="1.5" transform="rotate(32 20 20)"/></g></svg> <span>5 Card Draw</span></button>
+              <button class="mode" type="button" data-mode="holdem" aria-pressed="false"><svg class="mode-icon" viewBox="0 0 40 24" width="26" height="16" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="1.6"><rect x="10" y="3" width="9" height="15" rx="1.5"/><rect x="21" y="3" width="9" height="15" rx="1.5"/></g></svg> <span>Texas Hold’em</span></button>
             </div></div>
             <div class="hand-number">HAND <strong id="hand-number">#001</strong></div>
           </div>
@@ -47,21 +49,20 @@
           <div id="table" class="table">
             <div class="table-topline"><span><i></i> TAVOLO BINARIO</span><span id="phase-label">PRIMA PUNTATA</span></div>
             <div class="opponent-row">
-              <div class="player-label"><div class="avatar bot-avatar">🤖</div><div><strong>CPU_01</strong><small>IL TUO AVVERSARIO</small></div></div>
-              <div class="stack"><small>FICHES</small><strong id="bot-chips">100</strong></div>
+              <div class="player-label"><div class="avatar bot-avatar" id="bot-avatar">🤖</div><div><small class="opponent-role">IL TUO AVVERSARIO</small><strong id="bot-name">RoboByte</strong></div></div>
+              <div class="stack"><small>FICHES</small><strong id="bot-chips">128</strong><span class="stack-bin" id="bot-chips-bin"></span></div>
             </div>
             <div class="cards opponent-cards" id="bot-cards" aria-label="Carte della CPU"></div>
             <div class="opponent-point-slot"><div class="hand-indicator opponent-hand-indicator" id="bot-hand-indicator" aria-live="polite" hidden><span>PUNTO CPU</span><strong id="bot-hand-strength"></strong><button class="point-help" id="bot-point-help" type="button" aria-label="Spiega il punto della CPU" aria-expanded="false" aria-controls="bot-point-tooltip" title="Spiega il punto">i</button><span class="point-tooltip" id="bot-point-tooltip" role="tooltip" hidden></span></div></div>
             <div class="center-table">
-              <div class="pot"><span>✦</span><small>PIATTO</small><strong id="pot">0</strong><small>FICHES</small></div>
+              <div class="pot"><span>✦</span><small>PIATTO</small><strong id="pot">0</strong><small>FICHES</small><span class="pot-bin" id="pot-bin" aria-hidden="true"></span></div>
               <div class="community-wrap" id="community-wrap" hidden><div class="community-label">CARTE COMUNI <span>// THE BOARD</span></div><div class="cards community-cards" id="community-cards"></div></div>
-              <div class="draw-hint" id="draw-hint">LA FORTUNA È NEI BIT <span>✳</span></div>
             </div>
             <div class="cards player-cards" id="player-cards" aria-label="Le tue carte"></div>
             <div class="hand-indicator" id="hand-indicator" aria-live="polite"><span>IL TUO PUNTO</span><strong id="hand-strength"></strong><button class="point-help" id="player-point-help" type="button" aria-label="Spiega il tuo punto" aria-expanded="false" aria-controls="player-point-tooltip" title="Spiega il punto">i</button><span class="point-tooltip" id="player-point-tooltip" role="tooltip" hidden></span></div>
             <div class="player-row">
-              <div class="player-label"><div class="avatar player-avatar">☺</div><div><strong>Tu <span class="you-tag">YOU</span></strong><small>PRONTO A GIOCARE</small></div></div>
-              <div class="stack"><small>FICHES</small><strong id="player-chips">100</strong></div>
+              <div class="player-label"><button class="avatar player-avatar" id="player-avatar" type="button" aria-label="Modifica profilo" title="Modifica profilo">☺</button><div><strong><span id="player-name">Tu</span> <span class="you-tag">YOU</span></strong><small><button class="profile-edit" id="profile-open" type="button">✎ MODIFICA PROFILO</button></small></div></div>
+              <div class="stack"><small>FICHES</small><strong id="player-chips">128</strong><span class="stack-bin" id="player-chips-bin"></span></div>
             </div>
           </div>
 
@@ -70,12 +71,19 @@
             <div class="actions" id="bet-actions">
               <button class="button button-fold" id="fold" type="button">Passa</button>
               <button class="button button-secondary" id="call" type="button">Check</button>
-              <div class="bet-presets" id="bet-presets" role="group" aria-label="Puntate rapide">
-                <button type="button" data-bet-preset="3x" title="Tre volte l'ultima puntata o l'ante">3×</button>
-                <button type="button" data-bet-preset="pot" title="Rilancio a piatto">Piatto</button>
-                <button type="button" data-bet-preset="allin" title="Punta tutto lo stack disponibile">All-in</button>
+              <div class="bet-box">
+                <div class="bet-presets" id="bet-presets" role="group" aria-label="Puntate rapide">
+                  <button type="button" data-bet-preset="half" title="Metà piatto">½ Piatto</button>
+                  <button type="button" data-bet-preset="pot" title="Rilancio a piatto">Piatto</button>
+                  <button type="button" data-bet-preset="allin" title="Punta tutto lo stack disponibile">Max</button>
+                </div>
+                <div class="bet-slider-row">
+                  <input class="bet-input-number" id="bet-amount" type="number" min="2" value="4" inputmode="numeric" aria-label="Importo della puntata o rilancio">
+                  <button type="button" class="bet-step" id="bet-minus" aria-label="Diminuisci">−</button>
+                  <input class="bet-slider" id="bet-slider" type="range" min="2" max="128" value="4" aria-label="Importo con cursore">
+                  <button type="button" class="bet-step" id="bet-plus" aria-label="Aumenta">+</button>
+                </div>
               </div>
-              <label class="bet-input"><span>FICHES</span><input id="bet-amount" type="number" min="1" value="10" inputmode="numeric" aria-label="Importo della puntata o rilancio"></label>
               <button class="button button-primary" id="raise" type="button">Punta <span>↗</span></button>
             </div>
             <div class="actions" id="draw-actions" hidden><button class="button button-primary" id="draw" type="button">Cambia carte <span>↗</span></button></div>
@@ -84,7 +92,7 @@
         </div>
 
         <aside class="sidebar">
-          <div class="side-heading"><span class="section-kicker">LA TUA BUSSOLA</span><h2>Mani vincenti<span>.</span></h2><p>In ordine di potenza, dalla più alta.</p></div>
+          <div class="side-heading"><span class="section-kicker">IL VALORE DELLE MANI</span><h2>Mani vincenti</h2><p>In ordine di potenza, dalla più alta.</p></div>
           <ol class="ranking">
             <li><span>01</span><b>Scala reale</b><em>5 valori consecutivi, stesso seme</em></li>
             <li><span>02</span><b>Poker</b><em>4 carte dello stesso valore</em></li>
@@ -96,18 +104,49 @@
             <li><span>08</span><b>Coppia</b><em>2 valori uguali</em></li>
             <li><span>09</span><b>Carta alta</b><em>Nessuna combinazione</em></li>
           </ol>
-          <div class="side-tip"><span>✳</span><p><strong>Tip della partita</strong><span id="tip-text">Nel dubbio, pensa in binario. O bluffa come se lo facessi.</span></p></div>
-          <button class="rules-link" id="rules-open-side" type="button">Leggi tutte le regole <span>↗</span></button>
+          <div class="side-tip"><span>✳</span><p><strong id="tip-title">Tip della partita</strong><span id="tip-text">Nel dubbio, pensa in binario. O bluffa come se lo facessi.</span></p></div>
           <button class="rules-link series-help-link" id="series-open" type="button">Cos’è una Serie? <span>↗</span></button>
+          <button class="rules-link series-help-link" id="lab-open" type="button">Laboratorio binario <span>↗</span></button>
         </aside>
       </section>
       <footer><span>POKER BINARIO · <b>CC BY-NC-SA 4.0 · 2026</b> <a href="https://fabrizioortis.com">Fabrizio Ortis</a></span><span><button class="license-link" id="license-open" type="button" aria-label="Dettagli licenza CC BY-NC-SA 4.0">Licenza <span>↗</span></button> <b>✳</b></span></footer>
     </main>
   </div>
-  <dialog id="rules">
-    <div class="dialog-heading"><div><span class="section-kicker">IL MANUALE DEL GIOCATORE</span><h2>Le regole<span>.</span></h2></div><button id="rules-close" type="button" aria-label="Chiudi">×</button></div>
+  <div class="bit-tip" id="bit-tip" role="tooltip" hidden></div>
+  <dialog id="lab">
+    <div class="dialog-heading"><div><span class="section-kicker">IMPARA GIOCANDO</span><h2>Laboratorio binario</h2></div><button id="lab-close" type="button" aria-label="Chiudi">×</button></div>
     <div class="rules-content">
-      <p>Il mazzo contiene 64 carte: i valori da <b>0000</b> a <b>1111</b>, uno per ciascuno dei quattro semi rosso, verde, blu e nero (microchip). Giochi contro la CPU con 100 fiches a testa e un invito fino a 5 fiches per mano. Cambiare modalità ricomincia la partita e ripristina le fiches.</p>
+      <h3>1. Due sole cifre</h3>
+      <p>Un computer conosce solo <b>0</b> (spento) e <b>1</b> (acceso). Ogni cifra si chiama <b>bit</b>. Con più bit si scrivono numeri grandi, come con le cifre decimali.</p>
+      <h3>2. Ogni posizione ha un peso</h3>
+      <p>Da destra a sinistra i pesi raddoppiano: 1, 2, 4, 8, 16, 32, 64, 128. Il numero è la somma dei pesi dove c’è un 1. Prova: tocca i bit qui sotto, oppure scrivi un numero.</p>
+      <div class="lab-bits" id="lab-bits" aria-label="Otto bit da attivare"></div>
+      <p class="lab-sum" id="lab-sum" aria-live="polite"></p>
+      <div class="lab-fields">
+        <label><span>DECIMALE (0–255)</span><input id="lab-dec" type="number" min="0" max="255" inputmode="numeric"></label>
+        <label><span>BINARIO (8 bit)</span><input id="lab-bin" type="text" maxlength="8" inputmode="numeric" autocomplete="off"></label>
+      </div>
+      <h3>3. Nel gioco</h3>
+      <p><b>Valore della carta:</b> 4 bit con pesi 8, 4, 2, 1. Va da <b>0000</b> (0) a <b>1111</b> (15). Vince il numero più grande: 1000 (8) batte 0111 (7), perché il bit di peso 8 vale più degli altri tre messi insieme.</p>
+      <p><b>Seme:</b> 2 bit bastano per 4 semi (00, 01, 10, 11). Seme più valore fanno 6 bit: 2⁶ = 64 carte diverse.</p>
+      <p><b>Fiches e piatto:</b> si parte da 128 fiches, cioè 10000000, un solo bit acceso. Sotto ai contatori vedi sempre lo stesso numero in binario. Se tutte le fiches finiscono a un giocatore sono 256 = 100000000: servono 9 bit.</p>
+      <p><b>Overflow:</b> con 4 bit il massimo è 1111. Aggiungendo 1 non c’è più posto e si torna a 0000.</p>
+      <h3>Curiosità da provare</h3>
+      <p>Aggiungere uno 0 a destra raddoppia il numero: 11 (3) diventa 110 (6). Toccando una carta, con la didattica attiva, vedi come si scompone.</p>
+    </div>
+  </dialog>
+  <dialog id="profile">
+    <div class="dialog-heading"><div><span class="section-kicker">IL TUO PROFILO</span><h2>Chi sei</h2></div><button id="profile-close" type="button" aria-label="Chiudi">×</button></div>
+    <form class="profile-form" id="profile-form" method="dialog">
+      <label class="profile-name"><span>NOME</span><input id="profile-name" type="text" maxlength="14" autocomplete="off" placeholder="Tu"></label>
+      <div class="avatar-grid" id="avatar-grid" role="radiogroup" aria-label="Avatar"></div>
+      <button class="button button-primary" type="submit">Salva</button>
+    </form>
+  </dialog>
+  <dialog id="rules">
+    <div class="dialog-heading"><div><span class="section-kicker">IL MANUALE DEL GIOCATORE</span><h2>Le regole</h2></div><button id="rules-close" type="button" aria-label="Chiudi">×</button></div>
+    <div class="rules-content">
+      <p>Il mazzo contiene 64 carte: i valori da <b>0000</b> a <b>1111</b> (da 0 a 15, numeri binari a 4 bit), uno per ciascuno dei quattro semi rosso, verde, blu e nero (microchip). Giochi contro la CPU con 128 fiches a testa e un invito di 2 fiches per mano (puntata minima 2, salvo fiches residue inferiori). Cambiare modalità ricomincia la partita e ripristina le fiches. Il pulsante “Didattica” mostra i pesi dei bit e le spiegazioni sulle carte; il “Laboratorio binario” insegna a leggere e scrivere i numeri binari partendo da zero.</p>
       <h3>Due modi di giocare</h3>
       <p><b>5 Card Draw:</b> ricevi 5 carte, punta, scambia da 0 a 3 carte e punta di nuovo. Seleziona le carte da cambiare cliccandole.</p>
       <p><b>Texas Hold’em:</b> ricevi 2 carte private. Dopo ogni puntata vengono scoperte le carte comuni: flop (3), turn (1) e river (1). Allo showdown si usa la migliore combinazione di 5 carte fra le 7 disponibili, anche solo comuni.</p>
@@ -118,7 +157,7 @@
     </div>
   </dialog>
   <dialog id="series-help">
-    <div class="dialog-heading"><div><span class="section-kicker">UN ESEMPIO DI PUNTO</span><h2>La Serie<span>.</span></h2></div><button id="series-close" type="button" aria-label="Chiudi">×</button></div>
+    <div class="dialog-heading"><div><span class="section-kicker">UN ESEMPIO DI PUNTO</span><h2>La Serie</h2></div><button id="series-close" type="button" aria-label="Chiudi">×</button></div>
     <div class="rules-content">
       <p>Una Serie è una sequenza di almeno <b>3 valori binari distinti consecutivi</b>. Qui i valori si leggono come numeri da 0 a 15: consecutivi significa che ciascuno aumenta di 1, non che cambia un solo bit.</p>
       <p><b><code>0000 → 0001 → 0010</code></b> è una Serie di 3: 0, 1, 2. Anche <b><code>0011 → 0100</code></b> è consecutivo: 3, 4, anche se cambiano più bit.</p>
@@ -131,6 +170,7 @@
     <div class="rules-content">
       <p><strong>CC BY-NC-SA 4.0 · 2026 Fabrizio Ortis.</strong></p>
       <p>Quest'opera è distribuita con licenza <a rel="license" href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.it">CC BY-NC-SA 4.0</a>: puoi condividere e modificare Poker Binario per fini non commerciali, con attribuzione. Le opere derivate devono essere distribuite con la stessa licenza.</p>
+      <p><b>Uso didattico:</b> Poker Binario nasce per aiutare a imparare il sistema binario. Puoi usarlo in classe, in laboratorio e nei corsi senza scopo di lucro, adattarlo alle tue lezioni e condividerlo con i tuoi studenti, citando l'autore e mantenendo la stessa licenza.</p>
       <p>Consulta il <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.it">testo completo della licenza Creative Commons</a>.</p>
     </div>
   </dialog>
