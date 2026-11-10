@@ -18,9 +18,9 @@ possibile; il pokerissimo richiederebbe un quinto seme o una carta jolly.
 
 ## Didattica
 
-Con la modalità didattica attiva (predefinita) il gioco mostra i pesi dei bit
+Il gioco è pensato per la didattica e mostra i pesi dei bit
 sotto fiches e piatto, scompone ogni carta toccata o puntata (`0110 = 4 + 2 = 6`,
-seme a 2 bit, carta a 6 bit) e propone una pillola binaria al posto dei tip di
+seme a 2 bit, carta a 6 bit) e propone una curiosità binaria al posto dei tip di
 poker. Il Laboratorio binario permette di accendere i bit e convertire tra
 decimale e binario. Lo scopo è facilitare la conoscenza del binario; non servono
 conoscenze preliminari.

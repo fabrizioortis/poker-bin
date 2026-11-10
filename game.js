@@ -24,27 +24,7 @@ const opponentIndex = Math.floor(Math.random() * opponents.length);
 $("bot-name").textContent = opponents[opponentIndex].name;
 $("bot-avatar").textContent = opponents[opponentIndex].avatar;
 const robotFigures = new Map([[13, "ORBIT"], [14, "NOVA"], [15, "CORE"]]);
-const tips = [
-  "Una coppia è buona, ma i valori più alti fanno da spareggio.",
-  "Due coppie battono una coppia singola.",
-  "Conserva una coppia: nel Draw può diventare un tris al cambio.",
-  "Una serie richiede almeno tre valori distinti consecutivi.",
-  "Il full unisce un tris e una coppia.",
-  "Nel Draw puoi cambiare fino a tre carte, oppure tenerle tutte.",
-  "In Hold'em la miglior mano può usare anche solo le carte comuni.",
-  "Il valore 1111 è alto, ma non sempre è la carta giusta da tenere.",
-  "La scala reale richiede cinque valori consecutivi dello stesso seme.",
-  "Un check non costa fiches: usalo quando nessuno ha rilanciato.",
-  "Conta le carte comuni prima di decidere quanto vale la tua mano.",
-  "Un colore richiede cinque carte dello stesso seme.",
-  "Un rilancio è un rischio: valuta prima le fiches che restano.",
-  "Le carte dal valore vicino aiutano a costruire una serie.",
-  "Il piatto si divide in caso di pareggio: anche la CPU può avere la stessa mano.",
-  "Non confondere il valore binario con la forza della combinazione."
-];
 let mode = "draw";
-let learn = true;
-try { learn = localStorage.getItem("learn") !== "off"; } catch { /* storage non disponibile */ }
 const binaryTips = [
   "Un bit è una cifra che vale solo 0 oppure 1.",
   "Con 4 bit si contano 16 valori: da 0000 (0) a 1111 (15).",
@@ -281,10 +261,9 @@ function botRaiseAmount() {
 }
 
 function showTip() {
-  const list = learn ? binaryTips : tips;
+  const list = binaryTips;
   const availableTips = list.map((_, index) => index).filter((index) => index !== lastTipIndex);
   lastTipIndex = availableTips[Math.floor(Math.random() * availableTips.length)];
-  $("tip-title").textContent = learn ? "Pillola binaria" : "Tip della partita";
   $("tip-text").textContent = list[lastTipIndex];
 }
 
@@ -853,23 +832,6 @@ $("series-close").addEventListener("click", () => $("series-help").close());
 $("license-open").addEventListener("click", () => $("license-details").showModal());
 $("license-close").addEventListener("click", () => $("license-details").close());
 
-function applyLearn(changed = false) {
-  document.body.classList.toggle("learn-on", learn);
-  $("learn").setAttribute("aria-pressed", String(learn));
-  $("learn").querySelector("span").textContent = learn ? "Didattica: on" : "Didattica: off";
-  if (!learn) hideBitTip();
-  if (changed) {
-    try { localStorage.setItem("learn", learn ? "on" : "off"); } catch { /* storage non disponibile */ }
-    lastTipIndex = -1;
-    showTip();
-  }
-}
-$("learn").addEventListener("click", () => {
-  learn = !learn;
-  applyLearn(true);
-  playSound("click");
-});
-
 function hideBitTip() {
   $("bit-tip").hidden = true;
 }
@@ -899,7 +861,7 @@ function showBitTip(card) {
 }
 
 function cardFromEvent(event) {
-  return learn && event.target instanceof Element ? event.target.closest(".card[data-value]") : null;
+  return event.target instanceof Element ? event.target.closest(".card[data-value]") : null;
 }
 $("table").addEventListener("pointerover", (event) => {
   const card = cardFromEvent(event);
@@ -960,5 +922,4 @@ $("lab-open").addEventListener("click", () => {
 });
 $("lab-close").addEventListener("click", () => $("lab").close());
 
-applyLearn();
 newGame();

@@ -1588,3 +1588,10 @@ footer .license-link:hover {
   color: #17192e;
   font: 700 15px "DM Mono", monospace;
 }
+
+@media (min-width: 901px) {
+  .intro p {
+    max-width: none;
+    white-space: nowrap;
+  }
+}
