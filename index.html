@@ -3,6 +3,8 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self' data:; base-uri 'none'; form-action 'none'">
+  <meta name="referrer" content="no-referrer">
   <meta name="theme-color" content="#10122a">
   <meta name="license" content="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.it">
   <title>Poker Binario — impara il sistema binario giocando</title>
@@ -18,8 +20,8 @@
     <header class="topbar">
       <a class="brand" href="#" aria-label="Poker Binario, inizio"><span class="brand-icon"><svg viewBox="0 0 64 64" width="26" height="26" aria-hidden="true"><g stroke="currentColor" stroke-width="5" stroke-linecap="round"><path d="M24 8v8M32 8v8M40 8v8M24 48v8M32 48v8M40 48v8M8 24h8M8 32h8M8 40h8M48 24h8M48 32h8M48 40h8"/></g><rect x="16" y="16" width="32" height="32" rx="5" fill="none" stroke="currentColor" stroke-width="5"/><rect x="26" y="26" width="12" height="12" fill="currentColor"/></svg></span><span>POKER<span class="brand-accent"> BINARIO</span><small>BIT, BLUFF &amp; FORTUNA</small></span></a>
       <div class="top-actions">
-        <button class="sound-button" id="lab-open" type="button">▦ <span>Laboratorio binario</span></button>
-        <button class="sound-button" id="sound" type="button" aria-pressed="false">♫ <span>Attiva suono</span></button>
+        <button class="sound-button" id="lab-open" type="button" aria-label="Laboratorio binario">▦ <span>Laboratorio binario</span></button>
+        <button class="sound-button" id="sound" type="button" aria-label="Suono" aria-pressed="false">♫ <span>Attiva suono</span></button>
         <button class="text-button" id="rules-open" type="button">Come si gioca <span>↗</span></button>
       </div>
     </header>

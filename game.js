@@ -781,10 +781,7 @@ document.addEventListener("keydown", (event) => {
 });
 [$("rules-open")].forEach((button) => button.addEventListener("click", () => $("rules").showModal()));
 const playerAvatars = ["🧑‍💻", "👩🏾‍💻", "🧑‍🚀", "👩‍🔬", "🕵️", "🧑‍🎤", "👩‍🎤", "🧔🏿‍♂️", "\u{1F468}\u200D\u{1F9B2}", "🧑‍✈️"];
-const setAvatar = (element, avatar) => {
-  if (avatar.startsWith("<svg")) element.innerHTML = avatar;
-  else element.textContent = avatar;
-};
+const setAvatar = (element, avatar) => { element.textContent = avatar; };
 let profile = { name: "", avatar: 0 };
 try {
   const saved = JSON.parse(localStorage.getItem("profile"));
