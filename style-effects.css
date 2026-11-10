@@ -1293,10 +1293,14 @@ footer .license-link:hover {
   }
 }
 
-/* Mobile */
-@media (max-width: 900px) {
+/* Evita di comprimere il testo accanto ai controlli con sidebar visibile. */
+@media (max-width: 1200px) {
   .action-panel { grid-template-columns: 1fr; }
   .actions { width: 100%; flex-wrap: wrap; justify-content: flex-start; }
+}
+
+/* Mobile */
+@media (max-width: 900px) {
   .bet-box { flex: 1 1 100%; order: 3; }
   #raise { order: 4; width: 100%; }
 }
