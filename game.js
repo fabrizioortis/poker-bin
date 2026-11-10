@@ -24,7 +24,7 @@ const opponentIndex = Math.floor(Math.random() * opponents.length);
 $("bot-name").textContent = opponents[opponentIndex].name;
 $("bot-avatar").textContent = opponents[opponentIndex].avatar;
 const robotFigures = new Map([[13, "ORBIT"], [14, "NOVA"], [15, "CORE"]]);
-let mode = "draw";
+let mode = "holdem";
 const binaryTips = [
   "Un bit è una cifra che vale solo 0 oppure 1.",
   "Con 4 bit si contano 16 valori: da 0000 (0) a 1111 (15).",
@@ -756,7 +756,7 @@ document.querySelectorAll(".mode").forEach((button) => button.addEventListener("
 $("sound").addEventListener("click", () => {
   soundEnabled = !soundEnabled;
   $("sound").setAttribute("aria-pressed", String(soundEnabled));
-  $("sound").querySelector("span").textContent = soundEnabled ? "Suono: on" : "Attiva suono";
+  $("sound").querySelector("span").textContent = soundEnabled ? "Suono: on" : "Suono: off";
   playSound(soundEnabled ? "enable" : "click");
 });
 function closePointTooltips() {

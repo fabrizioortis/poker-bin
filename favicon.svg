@@ -1,7 +1,7 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-  <rect width="64" height="64" rx="15" fill="#17192e"/>
-  <rect x="4" y="4" width="56" height="56" rx="12" fill="none" stroke="#d8fd5d" stroke-opacity=".35" stroke-width="2"/>
-  <g stroke="#d8fd5d" stroke-width="4" stroke-linecap="round"><path d="M25 10v7M32 10v7M39 10v7M25 47v7M32 47v7M39 47v7M10 25h7M10 32h7M10 39h7M47 25h7M47 32h7M47 39h7"/></g>
-  <rect x="17" y="17" width="30" height="30" rx="5" fill="none" stroke="#d8fd5d" stroke-width="4"/>
-  <rect x="26" y="26" width="12" height="12" fill="#d8fd5d"/>
+  <rect width="64" height="64" rx="15" fill="#161f2f"/>
+  <rect x="4" y="4" width="56" height="56" rx="12" fill="none" stroke="#fca311" stroke-opacity=".35" stroke-width="2"/>
+  <g stroke="#fca311" stroke-width="4" stroke-linecap="round"><path d="M25 10v7M32 10v7M39 10v7M25 47v7M32 47v7M39 47v7M10 25h7M10 32h7M10 39h7M47 25h7M47 32h7M47 39h7"/></g>
+  <rect x="17" y="17" width="30" height="30" rx="5" fill="none" stroke="#fca311" stroke-width="4"/>
+  <rect x="26" y="26" width="12" height="12" fill="#fca311"/>
 </svg>
